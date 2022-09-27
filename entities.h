@@ -1,15 +1,22 @@
 #include <iostream>
 #include <string>
 
-// MAIN CLASS
+// GENERALIZED CLASS (ABSTRACT)
 
 class Object {
-	private: int id; int x, y; int type;
+	private: int id;
 
-	public: int getId() { return id; }
-		void setId(int val) { id = val; }
+	public: string getId() { return id; }
+                void setId(string val) { id = val; }
+};
 
-		int getX() { return x; }
+
+// MAIN CLASS (ABSTRACT)
+
+class Entity: public Object {
+	private: int x, y; int type;
+
+	public: int getX() { return x; }
                 int getY() { return y; }
 		void setCoords(int newX, int newY) { x = newX; y = newY; }
 
@@ -17,7 +24,7 @@ class Object {
 		void setType(int val) { type = val; }
 };
 
-// PROPERTIES CLASSES
+// PROPERTIES CLASSES (ABSTRACT)
 
 class Damager {
 	private: float dmg;
@@ -26,15 +33,15 @@ class Damager {
 		void setDmg(float val) { dmg = val; }
 };
 
-class Creature: protected Object {
-	private: int hp;
+class Mortal {
+	private: float hp;
 
 	public:	float getHp() { return hp; }
 		void setHp(float val) { hp = val; }
 };
 
-class Walker: {
-	private: int path[128][2];
+class Walker {
+	private: int path[128][2], int lenOfPath;
 
 	public: void getPath();
 		void calculatePath();
@@ -47,18 +54,60 @@ class Shooter {
 		void setRange(float val) { range = val; }
 };
 
+class Defence {
+	public: trigger();
+}
+
 // ACTORS CLASSES
 
-class Enemy: protected Entity, protected Creature, protected Walker, protected Damager {
-	public: Enemy();
+class Enemy: public Entity, public Mortal, public Walker, public Damager {
+	public:
+		Enemy(int idV, int xV, int yV, int tV, float hpV, int lenV, float dmgV) {
+			id = idV; x = xV; y = yV; type = tV; hp = hpV; lenOfPath = lenV; dmg = dmgV;
+		}
 };
 
-class Trap: protected Entity, protected Damager {
-	public:	Trap();
-		void trigger();
+class Trap: public Entity, public Defence, public Damager {
+	public:
+		Trap(int idV, int xV, int yV, int tV, float dmgV) {
+			id = idV; x = xV; y = yV; type = tV; dmg = dmgV;
+		}
+
+		int trigger(int xV; int yV) {
+			if(x == xV && y == yV) {
+				return dmg;
+			} else {
+				return 0;
+			}
+		}
 };
 
-class Ranger: protected Damager, protected Shooter, protected Entity {
-	public: Ranger();
-		void shoot();
+class Ranger: public Entity, public Defence, public Damager, public Shooter {
+	public:
+		Ranger(int idV, int xV, int yV, int tV, float dmgV, float rangeV) {
+			id = idV; x = xV; y = yV; type = tV; dmg = dmgV; range = rangeV;
+		}
+
+		int trigger(int xV, int yY) {
+			if(sqrt(sqr(x-xV) + sqr(y-yV)) < 1.5) {
+				return dmg;
+			} else {
+				return 0;
+			}
+		}
+};
+
+class Structure: public Entity, public Defence, public Mortal {
+	public:
+		Structure(int idV, int xV, int yV, int tV, int hpV) {
+			id = idV; x = xV; y = yV; type = tV; hp = hpV;
+		}
+
+		int trigger(int xV, int xY) {
+			if(x == xV && y = yV) {
+				return 1;
+			} else {
+				return 0;
+			}
+		}
 };
