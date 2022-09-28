@@ -1,19 +1,19 @@
 #include <iostream>
 
-// GENERALIZED CLASS (ABSTRACT)
+// SUPERCLASS (ABSTRACT)
 
 class Object {
-	private: int id; int type;
+	private: int id; /* int type; */
 
 	public: int getId() { return id; }
                 void setId(int val) { id = val; }
 
-		int getType() {return type; }
-                void setType(int val) { type = val; }
+		/* int getType() {return type; }
+                void setType(int val) { type = val; } */
 };
 
 
-// MAIN CLASS (ABSTRACT)
+// GENERALIZED CLASS (ABSTRACT)
 
 class Entity: public Object {
 	private: int x, y;
@@ -61,16 +61,16 @@ class Defence {
 
 class Enemy: public Entity, public Mortal, public Walker, public Damager {
 	public:
-		Enemy(int idV, int xV, int yV, int tV, float hpV, int lenV, float dmgV) {
+		/* Enemy(int idV, int xV, int yV, int tV, float hpV, int lenV, float dmgV) {
 			id = idV; x = xV; y = yV; type = tV; hp = hpV; lenOfPath = lenV; dmg = dmgV;
-		}
+		} */
 };
 
 class Trap: public Entity, public Defence, public Damager {
 	public:
-		Trap(int idV, int xV, int yV, int tV, float dmgV) {
+		/* Trap(int idV, int xV, int yV, int tV, float dmgV) {
 			id = idV; x = xV; y = yV; type = tV; dmg = dmgV;
-		}
+		} */
 
 		int trigger(int xV; int yV) {
 			if(x == xV && y == yV) {
@@ -83,9 +83,9 @@ class Trap: public Entity, public Defence, public Damager {
 
 class Ranger: public Entity, public Defence, public Damager, public Shooter {
 	public:
-		Ranger(int idV, int xV, int yV, int tV, float dmgV, float rangeV) {
+		/* Ranger(int idV, int xV, int yV, int tV, float dmgV, float rangeV) {
 			id = idV; x = xV; y = yV; type = tV; dmg = dmgV; range = rangeV;
-		}
+		} */
 
 		int trigger(int xV, int yY) {
 			if(sqrt(sqr(x-xV) + sqr(y-yV)) < 1.5) {
@@ -98,9 +98,9 @@ class Ranger: public Entity, public Defence, public Damager, public Shooter {
 
 class Structure: public Entity, public Defence, public Mortal {
 	public:
-		Structure(int idV, int xV, int yV, int tV, int hpV) {
+		/* Structure(int idV, int xV, int yV, int tV, int hpV) {
 			id = idV; x = xV; y = yV; type = tV; hp = hpV;
-		}
+		} */
 
 		int trigger(int xV, int xY) {
 			if(x == xV && y = yV) {
@@ -113,12 +113,16 @@ class Structure: public Entity, public Defence, public Mortal {
 
 class Tile: public Object {
 	private: bool occupied;
+		 bool trail;
 
 	public:
-		Tile(int idV, int tV, int oV) {
+		/* Tile(int idV, int tV, int oV, int trail) {
 			id = idV; type = tV; occupied = oV;
-		}
+		} */
 
 		bool getOcc() { return occupied; }
 		void setOcc(bool val) { occupied = val; }
+
+		bool getT() { return trail; }
+		void setT(bool tV) { trail = tV; }
 };
