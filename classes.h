@@ -1,22 +1,20 @@
 #include <iostream>
+#include <math.h>
 
 // SUPERCLASS (ABSTRACT)
 
 class Object {
-	private: int id; /* int type; */
+	protected: int id;
 
 	public: int getId() { return id; }
                 void setId(int val) { id = val; }
-
-		/* int getType() {return type; }
-                void setType(int val) { type = val; } */
 };
 
 
 // GENERALIZED CLASS (ABSTRACT)
 
 class Entity: public Object {
-	private: int x, y;
+	protected: int x, y;
 
 	public: int getX() { return x; }
                 int getY() { return y; }
@@ -26,53 +24,71 @@ class Entity: public Object {
 // PROPERTIES CLASSES (ABSTRACT)
 
 class Damager {
-	private: float dmg;
+	protected: float dmg;
 
 	public:	float getDmg() { return dmg; }
 		void setDmg(float val) { dmg = val; }
 };
 
 class Mortal {
-	private: float hp;
+	protected: float hp;
 
 	public:	float getHp() { return hp; }
 		void setHp(float val) { hp = val; }
 };
 
 class Walker {
-	private: int path[128][2], int lenOfPath;
+	protected: int path[64][2]; int lenOfPath;
 
 	public: void getPath();
 		void calculatePath();
 };
 
 class Shooter {
-        private: float range;
+        protected: float range; int bullets;
 
         public:	float getRange() { return range; }
 		void setRange(float val) { range = val; }
+		int getBullets() { return bullets; }
+		void setBullets(int bV) { bullets = bV; }
+
+		bool checkBullets() {
+			if(bullets) {
+				return true;
+			} else {
+				return false;
+			}
+		}
 };
 
 class Defence {
-	public: trigger();
-}
+	public: int trigger();
+};
 
 // ACTORS CLASSES
 
 class Enemy: public Entity, public Mortal, public Walker, public Damager {
-	public:
-		/* Enemy(int idV, int xV, int yV, int tV, float hpV, int lenV, float dmgV) {
-			id = idV; x = xV; y = yV; type = tV; hp = hpV; lenOfPath = lenV; dmg = dmgV;
-		} */
+	protected: float reward;
+
+	public: float getReward() { return reward; }
+		void setReward(float rV) { reward = rV; }
+
+		void setup(int idV, int xV, int yV, int hpV, int dmgV, int rV) {
+			id = idV; x = xV; y = yV; hp = hpV; dmg = dmgV; reward = rV;
+		}
 };
 
 class Trap: public Entity, public Defence, public Damager {
-	public:
-		/* Trap(int idV, int xV, int yV, int tV, float dmgV) {
-			id = idV; x = xV; y = yV; type = tV; dmg = dmgV;
-		} */
+	protected: int type;
 
-		int trigger(int xV; int yV) {
+	public: int getType() { return type; }
+		int setType(int tV) { type = tV; }
+
+		void setup(int idV, int xV, int yV, int tV, int dmgV) {
+			id = idV; x = xV; y = yV; type = tV; dmg = dmgV;
+		}
+
+		int trigger(int xV, int yV) {
 			if(x == xV && y == yV) {
 				return dmg;
 			} else {
@@ -83,12 +99,12 @@ class Trap: public Entity, public Defence, public Damager {
 
 class Ranger: public Entity, public Defence, public Damager, public Shooter {
 	public:
-		/* Ranger(int idV, int xV, int yV, int tV, float dmgV, float rangeV) {
-			id = idV; x = xV; y = yV; type = tV; dmg = dmgV; range = rangeV;
-		} */
+		void setup(int idV, int xV, int yV, int dmgV, int rV, int bV) {
+			id = idV; x = xV; y = yV; dmg = dmgV; range = rV; bullets = bV;
+		}
 
-		int trigger(int xV, int yY) {
-			if(sqrt(sqr(x-xV) + sqr(y-yV)) < 1.5) {
+		int trigger(int xV, int yV) {
+			if(sqrt(pow(x-xV, 2) + pow(y-yV, 2)) < range) {
 				return dmg;
 			} else {
 				return 0;
@@ -98,12 +114,8 @@ class Ranger: public Entity, public Defence, public Damager, public Shooter {
 
 class Structure: public Entity, public Defence, public Mortal {
 	public:
-		/* Structure(int idV, int xV, int yV, int tV, int hpV) {
-			id = idV; x = xV; y = yV; type = tV; hp = hpV;
-		} */
-
-		int trigger(int xV, int xY) {
-			if(x == xV && y = yV) {
+		int trigger(int xV, int yV) {
+			if(x == xV && y == yV) {
 				return 1;
 			} else {
 				return 0;
@@ -115,12 +127,7 @@ class Tile: public Object {
 	private: bool occupied;
 		 bool trail;
 
-	public:
-		/* Tile(int idV, int tV, int oV, int trail) {
-			id = idV; type = tV; occupied = oV;
-		} */
-
-		bool getOcc() { return occupied; }
+	public: bool getOcc() { return occupied; }
 		void setOcc(bool val) { occupied = val; }
 
 		bool getT() { return trail; }
