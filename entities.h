@@ -1,27 +1,26 @@
 #include <iostream>
-#include <string>
 
 // GENERALIZED CLASS (ABSTRACT)
 
 class Object {
-	private: int id;
+	private: int id; int type;
 
-	public: string getId() { return id; }
-                void setId(string val) { id = val; }
+	public: int getId() { return id; }
+                void setId(int val) { id = val; }
+
+		int getType() {return type; }
+                void setType(int val) { type = val; }
 };
 
 
 // MAIN CLASS (ABSTRACT)
 
 class Entity: public Object {
-	private: int x, y; int type;
+	private: int x, y;
 
 	public: int getX() { return x; }
                 int getY() { return y; }
 		void setCoords(int newX, int newY) { x = newX; y = newY; }
-
-		int getType() {return type; }
-		void setType(int val) { type = val; }
 };
 
 // PROPERTIES CLASSES (ABSTRACT)
@@ -110,4 +109,16 @@ class Structure: public Entity, public Defence, public Mortal {
 				return 0;
 			}
 		}
+};
+
+class Tile: public Object {
+	private: bool occupied;
+
+	public:
+		Tile(int idV, int tV, int oV) {
+			id = idV; type = tV; occupied = oV;
+		}
+
+		bool getOcc() { return occupied; }
+		void setOcc(bool val) { occupied = val; }
 };
