@@ -9,10 +9,12 @@ using namespace std;
 class Game: public Object {
 	private:
 		// STATS
+
 		int round;
 		float money;
 
 		// OBJECTS
+
 		Tile field[9*9]; int dim;
 		Enemy enemies[64]; int nE;
 		Trap traps[64]; int nT;
@@ -36,6 +38,8 @@ class Game: public Object {
 
 		bool checkMoney(float);
 
+		// GET- & SETTERS
+
 		int getDim() { return dim; }
 
 		int getRound() { return round; }
@@ -53,6 +57,8 @@ class Game: public Object {
 		int getR() { return nR; }
 		void setR(int rV) { nR = rV; }
 };
+
+// STORES THE INFO ABOUT THE COST OF THE DEFENSIVE ACTORS
 
 class PriceList: public Object {
 	private:
@@ -76,6 +82,8 @@ int main() {
 
 	return 0;
 };
+
+// BASIC WORK WITH THE FIELD
 
 void Game::setupField() {
 	for(int i = 0; i < dim; i++) {
@@ -113,14 +121,13 @@ void Game::setupField() {
         target.setHp(10.0f);
 };
 
-// RESET: \u001b[0m
-// RED: \u001b[31m
-// GREEN: \u001b[32m
-// YELLOW: \u001b[33m
-// BLUE: \u001b[34m
-
-
 void Game::drawState() {
+	// RESET: \u001b[0m
+	// RED: \u001b[31m
+	// GREEN: \u001b[32m
+	// YELLOW: \u001b[33m
+	// BLUE: \u001b[34m
+
 	for(int i = 0; i < dim; i++) {
 		for(int k = 0; k < 14; k++) {
                 	cout << ' ';
@@ -140,10 +147,12 @@ void Game::drawState() {
 	}
 };
 
-// AT THIS STAGE OF DEVELOPMENT, I WILL JUST SPAWN 4 WOLVES THAT WILL
-// RUN FROM DIFFERENT ENDS OF THE MAP TO THE CENTER
+// CONSTRUCTION OF ACTORS
 
 void Game::addEnemies() {
+	// AT THIS STAGE OF DEVELOPMENT, I WILL JUST SPAWN 4 WOLVES THAT WILL
+	// RUN FROM DIFFERENT ENDS OF THE MAP TO THE CENTER
+
 	int spawns[4][2] = { {0, 0}, {0, 8}, {8, 0}, {8, 8} };
 
 	nE = 4;
@@ -173,6 +182,8 @@ void Game::addRanger(int xV, int yV) {
 	nR++;
 };
 
+// BALANCE CHECK UPON PURCHASE
+
 bool Game::checkMoney(float val) {
 	if(money >= val) {
 		return true;
@@ -180,3 +191,13 @@ bool Game::checkMoney(float val) {
 		return false;
 	}
 };
+
+// BASIC ACTIONS AND INTERATIONS OF ACTORS
+
+void Game::enemiesMove() {
+	for(int i = 0; i < eN; i++) {
+		enemies[i].makeStep();
+	}
+};
+
+void Game::defendersMove() {};

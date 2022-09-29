@@ -40,7 +40,7 @@ class Mortal {
 class Walker {
 	protected: int path[64][2]; int lenOfPath;
 
-	public: void getPath();
+	public: void makeStep();
 		void calculatePath();
 };
 
@@ -133,3 +133,11 @@ class Tile: public Object {
 		bool getT() { return trail; }
 		void setT(bool tV) { trail = tV; }
 };
+
+// SOME DECLARATIONS
+
+void Walker::makeStep() {
+	x = path[lenOfPath-1][0]; y = path[lenOfPath-1][1]; lenOfPath--;
+};
+
+void Walker::calculatePath() {};
