@@ -195,9 +195,42 @@ bool Game::checkMoney(float val) {
 // BASIC ACTIONS AND INTERATIONS OF ACTORS
 
 void Game::enemiesMove() {
-	for(int i = 0; i < eN; i++) {
+	for(int i = 0; i < nE; i++) {
 		enemies[i].makeStep();
 	}
 };
 
-void Game::defendersMove() {};
+void Game::defendersMove() {
+	// CHECK TRAPS
+
+	for(int i = 0; i < nT; i++) {
+		for(int j = 0; j < nE; j++) {
+			if(traps[i].trigger(enemies[j].getX(), enemies[j].getY())) {
+				enemies[j].setHp(enemies[j].getHp()-traps[i].getDmg());
+
+				for(int k = j; k < nT-1; k++) {
+					traps[k].setup(traps[k+1].getId(),
+						traps[k+1].getX(), traps[k+1].getY(),
+						traps[k+1].getType(), traps[k+1].getDmg());
+				}
+
+				nT--;
+
+				if(enemies[j].getHp() <= 0) {
+					for(int k = 0; k < nE-1; k++) {
+						enemies[k].setup(enemies[k+1].getId(),
+							enemies[k+1].getX(), enemies[k+1].getY(),
+							enemies[k+1].getHp(), enemies[k+1].getDmg(),
+							enemies[k+1].getReward());
+					}
+
+					nE--;
+				}
+			} else {
+				continue;
+			}
+		}
+	}
+
+	// CHECK RANGERS
+};

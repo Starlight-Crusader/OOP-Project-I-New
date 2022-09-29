@@ -76,13 +76,16 @@ class Enemy: public Entity, public Mortal, public Walker, public Damager {
 		void setup(int idV, int xV, int yV, int hpV, int dmgV, int rV) {
 			id = idV; x = xV; y = yV; hp = hpV; dmg = dmgV; reward = rV;
 		}
+
+		void makeStep();
+                void calculatePath();
 };
 
 class Trap: public Entity, public Defence, public Damager {
 	protected: int type;
 
 	public: int getType() { return type; }
-		int setType(int tV) { type = tV; }
+		void setType(int tV) { type = tV; }
 
 		void setup(int idV, int xV, int yV, int tV, int dmgV) {
 			id = idV; x = xV; y = yV; type = tV; dmg = dmgV;
@@ -136,8 +139,8 @@ class Tile: public Object {
 
 // SOME DECLARATIONS
 
-void Walker::makeStep() {
+void Enemy::makeStep() {
 	x = path[lenOfPath-1][0]; y = path[lenOfPath-1][1]; lenOfPath--;
 };
 
-void Walker::calculatePath() {};
+void Enemy::calculatePath() {};
