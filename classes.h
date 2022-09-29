@@ -1,5 +1,4 @@
 #include <iostream>
-#include <math.h>
 
 // SUPERCLASS (ABSTRACT)
 
@@ -38,10 +37,11 @@ class Mortal {
 };
 
 class Walker {
-	protected: int path[64][2]; int lenOfPath;
+	protected: int path[32][2]; int lenOfPath;
 
 	public: void makeStep();
 		void calculatePath();
+		void showPath();
 };
 
 class Shooter {
@@ -78,17 +78,21 @@ class Enemy: public Entity, public Mortal, public Walker, public Damager {
 		}
 
 		void makeStep();
-                void calculatePath();
+                void calculatePath(int, int, int);
+		void showPath();
 };
 
 class Trap: public Entity, public Defence, public Damager {
-	protected: int type;
+	protected: int type; bool armed;
 
 	public: int getType() { return type; }
 		void setType(int tV) { type = tV; }
 
-		void setup(int idV, int xV, int yV, int tV, int dmgV) {
-			id = idV; x = xV; y = yV; type = tV; dmg = dmgV;
+		bool getArm() { return armed; }
+		void setArm(bool aV) { armed = aV; }
+
+		void setup(int idV, int xV, int yV, int tV, int dmgV, bool aV) {
+			id = idV; x = xV; y = yV; type = tV; dmg = dmgV; armed = aV;
 		}
 
 		int trigger(int xV, int yV) {
@@ -107,7 +111,7 @@ class Ranger: public Entity, public Defence, public Damager, public Shooter {
 		}
 
 		int trigger(int xV, int yV) {
-			if(sqrt(pow(x-xV, 2) + pow(y-yV, 2)) < range) {
+			if((x-xV)*(x-xV) + (y-yV)*(y-yV) <= range*range) {
 				return dmg;
 			} else {
 				return 0;
@@ -143,4 +147,73 @@ void Enemy::makeStep() {
 	x = path[lenOfPath-1][0]; y = path[lenOfPath-1][1]; lenOfPath--;
 };
 
-void Enemy::calculatePath() {};
+void Enemy::calculatePath(int d, int tX, int tY) {
+	int fieldCopy[9][9]; int len = 0; int temp = 0; bool step;
+
+	for(int i = 0; i < d; i++) {
+		for(int j = 0; j < d; j++) {
+			fieldCopy[i][j] = -1;
+		}
+	}
+
+	for(int i = 0; i < d; i++) {
+		fieldCopy[1][i] = 0;
+		fieldCopy[7][i] = 0;
+
+		fieldCopy[i][1] = 0;
+		fieldCopy[i][7] = 0;
+	}
+
+	for(int i = 3; i <= 5; i++) {
+		for(int j = 3; j <= 5; j++) {
+			fieldCopy[i][j] = 0;
+		}
+	}
+
+	fieldCopy[5][2] = 0;
+	fieldCopy[3][6] = 0;
+
+	fieldCopy[0][0] = 0;
+	fieldCopy[0][8] = 0;
+	fieldCopy[8][0] = 0;
+	fieldCopy[8][8] = 0;
+
+	fieldCopy[y-1][x-1] = temp+1;
+
+	while(1) {
+		if(fieldCopy[tY][tX]) {
+			break;
+		}
+
+		temp++;
+
+		for(int i = 0; i < d; i++) {
+			for(int j = 0; j < d; j++) {
+				if(fieldCopy[i][j] == temp) {
+					if(fieldCopy[i-1][j]) { fieldCopy[i-1][j] = temp + 1; }
+					if(fieldCopy[i+1][j]) { fieldCopy[i+1][j] = temp + 1; }
+					if(fieldCopy[i][j-1]) { fieldCopy[i][j-1] = temp + 1; }
+					if(fieldCopy[i][j+1]) { fieldCopy[i][j+1] = temp + 1; }
+				}
+			}
+		}
+	}
+
+	len = temp; temp++;
+
+	for(int k = 0; k < len; k++) {
+		step = false;
+
+		for(int i = 0; i < d; i++) {
+			for(int j = 0; j < d; j++) {
+				if(fieldCopy[i][j] == temp) {
+					path[k][0] = i + 1; path[k][1] = j + 1;
+					step = true; temp--;
+					break;
+				}
+			}
+
+			if(step) { break; }
+		}
+	}
+};

@@ -34,7 +34,8 @@ class Game: public Object {
 		void addRanger(int, int);
 
 		void enemiesMove();
-		void defendersMove();
+		float defendersMove();
+		float checkFinish();
 
 		bool checkMoney(float);
 
@@ -165,12 +166,12 @@ void Game::addEnemies() {
 void Game::addTrap(int tV, int xV, int yV) {
 	switch(tV) {
 		case 0:
-			traps[nT].setup(rand(), xV, yV, 0, 2.0f);
+			traps[nT].setup(rand(), xV, yV, 0, 2.0f, true);
 			nT++;
 
 			break;
 		case 1:
-			traps[nT].setup(rand(), xV, yV, 1, 4.0f);
+			traps[nT].setup(rand(), xV, yV, 1, 4.0f, true);
 			nT++;
 
 			break;
@@ -197,27 +198,34 @@ bool Game::checkMoney(float val) {
 void Game::enemiesMove() {
 	for(int i = 0; i < nE; i++) {
 		enemies[i].makeStep();
+
+		cout << ">>> EVENT: Enemy {id: " << enemies[i].getId() << "} made a step towards the target <<<\n";
 	}
 };
 
-void Game::defendersMove() {
+float Game::defendersMove() {
+	float rewards;
+	bool destroyed;
+
 	// CHECK TRAPS
 
 	for(int i = 0; i < nT; i++) {
 		for(int j = 0; j < nE; j++) {
-			if(traps[i].trigger(enemies[j].getX(), enemies[j].getY())) {
+			if(!traps[i].getArm()) {
+				break;
+			} else if(traps[i].trigger(enemies[j].getX(), enemies[j].getY())) {
 				enemies[j].setHp(enemies[j].getHp()-traps[i].getDmg());
+				traps[i].setArm(false);
 
-				for(int k = j; k < nT-1; k++) {
-					traps[k].setup(traps[k+1].getId(),
-						traps[k+1].getX(), traps[k+1].getY(),
-						traps[k+1].getType(), traps[k+1].getDmg());
-				}
-
-				nT--;
+				cout << ">>> EVENT: TRAP {id: " << traps[i].getId() << "} was triggered by ENEMY {id: " << enemies[j].getId() << "} <<<\n";
+				cout << ">>> EVENT: TRAP {id: " << traps[i].getId() << "} was disarmed <<<\n";
 
 				if(enemies[j].getHp() <= 0) {
-					for(int k = 0; k < nE-1; k++) {
+					rewards += enemies[j].getReward();
+
+					cout << ">>> EVENT: ENEMY {id: " << enemies[j].getId() << "} was killed <<<\n";
+
+					for(int k = j; k < nE-1; k++) {
 						enemies[k].setup(enemies[k+1].getId(),
 							enemies[k+1].getX(), enemies[k+1].getY(),
 							enemies[k+1].getHp(), enemies[k+1].getDmg(),
@@ -226,6 +234,8 @@ void Game::defendersMove() {
 
 					nE--;
 				}
+
+				break;
 			} else {
 				continue;
 			}
@@ -233,4 +243,119 @@ void Game::defendersMove() {
 	}
 
 	// CHECK RANGERS
+
+	for(int i = 0; i < nR; i++) {
+		for(int j = 0; j < nE; j++) {
+			if(!rangers[i].checkBullets()) {
+				break;
+			} else if(rangers[i].trigger(enemies[j].getX(), enemies[j].getY())) {
+				enemies[j].setHp(enemies[j].getHp()-rangers[i].getDmg());
+				rangers[i].setBullets(rangers[i].getBullets()-1);
+
+				cout << ">>> EVENT: RANGER {id: " << rangers[i].getId() << "shot at ENEMY {id: " << enemies[j].getId() << "} <<<\n";
+				cout << ">>> EVENT: RANGER {id: " << rangers[i].getId() << "spend 1 bullet; bullets left: " << rangers[i].getBullets() << "<<<\n";
+
+				if(enemies[j].getHp() <= 0) {
+                                	rewards += enemies[j].getReward();
+
+                                	cout << ">>> EVENT: ENEMY {id: " << enemies[j].getId() << "} was killed <<<\n";
+
+                                	for(int k = j; k < nE-1; k++) {
+                                        	enemies[k].setup(enemies[k+1].getId(),
+                                                	enemies[k+1].getX(), enemies[k+1].getY(),
+                                                	enemies[k+1].getHp(), enemies[k+1].getDmg(),
+                                                	enemies[k+1].getReward());
+					}
+
+                                	nE--;
+                        	}
+
+				break;
+			} else {
+				continue;
+			}
+		}
+	}
+
+	// DESTROY DISARMED TRAPS & EMPTY RANGERS
+
+	while(1) {
+		destroyed = false;
+
+		for(int i = 0; i < nT; i++) {
+			if(!traps[i].getArm()) {
+				cout << ">>> LOG: TRAP {id: " << traps[i].getId() << "} was destroyed <<<\n";
+
+				for(int k = i; k < nT-1; k++) {
+                                	traps[k].setup(traps[k+1].getId(),
+                                        	traps[k+1].getX(), traps[k+1].getY(),
+                                                traps[k+1].getType(), traps[k+1].getDmg(),
+						traps[k+1].getArm());
+                                }
+
+				destroyed = true;
+			} else { continue; }
+
+			if(destroyed) {	break; }
+		}
+
+		if(!destroyed) { break; }
+	}
+
+	while(1) {
+                destroyed = false;
+
+                for(int i = 0; i < nR; i++) {
+                        if(!rangers[i].checkBullets()) {
+                                cout << ">>> LOG: RANGER {id: " << rangers[i].getId() << "} was destroyed <<<\n";
+
+                                for(int k = i; k < nR-1; k++) {
+                                        rangers[k].setup(rangers[k+1].getId(),
+                                                rangers[k+1].getX(), rangers[k+1].getY(),
+                                                rangers[k+1].getDmg(), rangers[k+1].getRange(),
+						rangers[k+1].getBullets());
+                                }
+
+                                destroyed = true;
+                        } else { continue; }
+
+                        if(destroyed) { break; }
+                }
+
+                if(!destroyed) { break; }
+        }
+
+	return rewards;
+};
+
+float Game::checkFinish() {
+	float damage = 0.0f;
+	bool finished;
+
+	while(1) {
+		finished = false;
+
+		for(int i = 0; i < nE; i++) {
+                        if(enemies[i].getX() == target.getX() && enemies[i].getY() == target.getY()) {
+				damage += enemies[i].getDmg();
+
+                                cout << ">>> EVENT: ENEMY {id: " << enemies[i].getId() << "} has reached the TARGET {id: " << target.getId() << " <<<\n";
+
+                                for(int k = i; k < nR-1; k++) {
+                                        enemies[k].setup(enemies[k+1].getId(),
+                                                enemies[k+1].getX(), enemies[k+1].getY(),
+                                                enemies[k+1].getHp(), enemies[k+1].getDmg(),
+                                                enemies[k+1].getReward());
+                                }
+
+                                finished = true;
+                        } else { continue; }
+
+                        if(finished) { break; }
+                }
+
+                if(!finished) { break; }
+	}
+
+	return damage;
 };
