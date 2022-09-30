@@ -14,6 +14,7 @@ class Game: public Object {
 		float money;
 		int phase;
 		bool abort;
+		int kills;
 
 		// OBJECTS
 
@@ -24,8 +25,8 @@ class Game: public Object {
 		Structure target;
 
 	public:
-		Game(int idV, int dimV, int rV, int mV, int pV, int aV) {
-			id = idV; dim = dimV; round = rV; money = mV; phase = pV; abort = aV;
+		Game(int idV, int dimV, int rV, int mV, int pV, int aV, int kV) {
+			id = idV; dim = dimV; round = rV; money = mV; phase = pV; abort = aV; kills = kV;
 		}
 
 		void setupField();
@@ -36,10 +37,22 @@ class Game: public Object {
 		void addRanger(int, int);
 
 		void enemiesMove();
-		float defendersMove();
-		float checkFinish();
+		void defendersMove();
+		void checkFinish();
 
 		bool checkMoney(float);
+
+		void printPhase();
+		void printStats();
+		void printFinalStats();
+
+		bool checkGO() {
+			if(target.getHp() <= 0) {
+				return true;
+			} else {
+				return false;
+			}
+		}
 
 		// GET- & SETTERS
 
@@ -62,6 +75,12 @@ class Game: public Object {
 
 		int getPhase() { return phase; }
 		void setPhase(int pV) { phase = pV; }
+
+		bool getAbort() { return abort; }
+		void detAbort(int aV) { abort = aV; }
+
+		int getK() { return kills; }
+		void setK(int kV) { kills = kV; }
 };
 
 // STORES THE INFO ABOUT THE COST OF THE DEFENSIVE ACTORS
@@ -80,11 +99,56 @@ class PriceList: public Object {
 		float getRPrice() { return ranger; }
 };
 
+// OPTIONS LISTS
+
+class OptionsLists: public Object {
+	public:
+		OptionsLists(int idV) {
+			id = idV;
+		}
+
+		void printOptionsMain() {
+			cout << '\n';
+                        cout << "-------------------------------------\n";
+                        cout << "          Select an action:\n";
+                        cout << " 1. Place a new beartrap (0.1$),\n";
+                        cout << " 2. Place a new nest (0.2$),\n";
+			cout << " 3. Hire a ranger (0.4$)";
+                        cout << " 4. Sell a defender (50% back),\n";
+                        cout << " 5. Start the next round,\n";
+                        cout << " 6. Finish the game\n";
+                        cout << "-------------------------------------\n";
+                        cout << '\n';
+		}
+
+		void printOptionsBuy() {
+                        cout << '\n';
+                        cout << "-------------------------------------\n";
+                        cout << " Input coord-s of a new def. in the\n";
+                        cout << " form: 'x y' OR enter '0 0' in order\n";
+                        cout << " to abort this operation ...\n";
+                        cout << "-------------------------------------\n";
+                        cout << '\n';
+                        cout << "INPUT: ";
+		}
+
+		void printOptionsSell() {
+			cout << '\n';
+                        cout << "-------------------------------------\n";
+                        cout << " Input coord-s of a def. to sell in\n";
+                        cout << " the form: 'x y' OR enter '0 0' in\n";
+                        cout << " order to abort this operation ...\n";
+                        cout << "-------------------------------------\n";
+                        cout << '\n';
+                        cout << "INPUT: ";
+		}
+};
+
 int main() {
 	srand(time(0)); system("clear");
 
-	PriceList pl(rand(), 0.05f, 0.1f, 0.2f);
-	Game session(rand(), 9, 0, 0.4f, 0, false); session.setupField(); session.drawState();
+	PriceList pl(rand(), 0.05f, 0.1f, 0.2f); OptionsLists ol(rand());
+	Game session(rand(), 9, 0, 0.4f, 0, false, 0); session.setupField(); session.drawState();
 
 	while(!abort) {
 		if(!session.getPhase()) {
@@ -93,7 +157,7 @@ int main() {
 			// ACTION PHASE
 		}
 
-		if(session.target.getHp() <= 0) { break; }
+		if(session.checkGO()) { break; }
 	}
 
 	return 0;
@@ -218,8 +282,7 @@ void Game::enemiesMove() {
 	}
 };
 
-float Game::defendersMove() {
-	float rewards;
+void Game::defendersMove() {
 	bool destroyed;
 
 	// CHECK TRAPS
@@ -236,7 +299,8 @@ float Game::defendersMove() {
 				cout << ">>> EVENT: TRAP {id: " << traps[i].getId() << "} was disarmed <<<\n";
 
 				if(enemies[j].getHp() <= 0) {
-					rewards += enemies[j].getReward();
+					money += enemies[j].getReward();
+					kills++;
 
 					cout << ">>> EVENT: ENEMY {id: " << enemies[j].getId() << "} was killed <<<\n";
 
@@ -271,7 +335,8 @@ float Game::defendersMove() {
 				cout << ">>> EVENT: RANGER {id: " << rangers[i].getId() << "spend 1 bullet; bullets left: " << rangers[i].getBullets() << "<<<\n";
 
 				if(enemies[j].getHp() <= 0) {
-                                	rewards += enemies[j].getReward();
+                                	money += enemies[j].getReward();
+					kills++;
 
                                 	cout << ">>> EVENT: ENEMY {id: " << enemies[j].getId() << "} was killed <<<\n";
 
@@ -339,11 +404,9 @@ float Game::defendersMove() {
 
                 if(!destroyed) { break; }
         }
-
-	return rewards;
 };
 
-float Game::checkFinish() {
+void Game::checkFinish() {
 	float damage = 0.0f;
 	bool finished;
 
@@ -372,5 +435,38 @@ float Game::checkFinish() {
                 if(!finished) { break; }
 	}
 
-	return damage;
+	target.setHp(target.getHp()-damage);
+};
+
+// SOME OUTPUTS BY GAME
+
+void Game::printPhase() {
+	if(!phase) {
+       		cout << "\n=========== PLANNIG PHASE ===========\n";
+        } else {
+                cout << "\n============ ACTION PHASE ===========\n";
+               	cout << '\n';
+        }
+};
+
+void Game::printStats() {
+	cout << '\n';
+        cout << "-------------------------------------\n";
+        cout << "               Stats:\n";
+	cout << " * Round: " << round + 1 << ",\n";
+        cout << " * HP: " << target.getHp() << ",\n";
+        cout << " * Money: " << money << '\n';
+        cout << "-------------------------------------\n";
+        cout << '\n';
+};
+
+void Game::printFinalStats() {
+        cout << '\n';
+      	cout << "-------------------------------------\n";
+       	cout << "             Final stats:\n";
+        cout << " * Rounds survived: " << round - 1 << ",\n";
+        cout << " * HP left: " << target.getHp() << ",\n";
+        cout << " * Enemies killed: " << kills << '\n';
+        cout << "-------------------------------------\n";
+        cout << '\n';
 };
