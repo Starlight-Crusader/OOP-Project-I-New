@@ -12,6 +12,8 @@ class Game: public Object {
 
 		int round;
 		float money;
+		int phase;
+		bool abort;
 
 		// OBJECTS
 
@@ -22,8 +24,8 @@ class Game: public Object {
 		Structure target;
 
 	public:
-		Game(int idV, int dimV, int rV, int mV) {
-			id = idV; dim = dimV; round = rV; money = mV;
+		Game(int idV, int dimV, int rV, int mV, int pV, int aV) {
+			id = idV; dim = dimV; round = rV; money = mV; phase = pV; abort = aV;
 		}
 
 		void setupField();
@@ -57,6 +59,9 @@ class Game: public Object {
 
 		int getR() { return nR; }
 		void setR(int rV) { nR = rV; }
+
+		int getPhase() { return phase; }
+		void setPhase(int pV) { phase = pV; }
 };
 
 // STORES THE INFO ABOUT THE COST OF THE DEFENSIVE ACTORS
@@ -79,7 +84,17 @@ int main() {
 	srand(time(0)); system("clear");
 
 	PriceList pl(rand(), 0.05f, 0.1f, 0.2f);
-	Game session(rand(), 9, 0, 0.4f); session.setupField(); session.drawState();
+	Game session(rand(), 9, 0, 0.4f, 0, false); session.setupField(); session.drawState();
+
+	while(!abort) {
+		if(!session.getPhase()) {
+			// PLANNING PHASE
+		} else {
+			// ACTION PHASE
+		}
+
+		if(session.target.getHp() <= 0) { break; }
+	}
 
 	return 0;
 };
