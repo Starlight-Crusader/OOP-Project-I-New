@@ -46,6 +46,9 @@ class Game: public Object {
 		void printStats();
 		void printFinalStats();
 
+		void calculatePaths();
+		void printPaths();
+
 		bool checkGO() {
 			if(target.getHp() <= 0) {
 				return true;
@@ -111,6 +114,7 @@ class OptionsLists: public Object {
 			cout << '\n';
                         cout << "-------------------------------------\n";
                         cout << "          Select an action:\n";
+			cout << " 0. Highlight the paths of the en-s,\n";
                         cout << " 1. Place a new beartrap (0.1$),\n";
                         cout << " 2. Place a new nest (0.2$),\n";
 			cout << " 3. Hire a ranger (0.4$)";
@@ -469,4 +473,12 @@ void Game::printFinalStats() {
         cout << " * Enemies killed: " << kills << '\n';
         cout << "-------------------------------------\n";
         cout << '\n';
+};
+
+// PATHS HANDLING
+
+void Game::calculatePaths() {
+	for(int i = 0; i < nE; i++) {
+		enemies[i].calculatePath(9, target.getX(), target.getY());
+	}
 };
