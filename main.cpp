@@ -1,5 +1,5 @@
+#include <iostream>
 #include <cstdlib>
-#include <list>
 #include <unistd.h>
 
 #include "classes.h"
@@ -30,7 +30,7 @@ class Game: public Object {
 		}
 
 		void setupField();
-		void drawState();
+		int drawState();
 
 		void addEnemies();
 		void addTrap(int, int, int);
@@ -47,7 +47,7 @@ class Game: public Object {
 		void printFinalStats();
 
 		void calculatePaths();
-		void printPaths();
+		void displayPaths();
 
 		bool checkGO() {
 			if(target.getHp() <= 0) {
@@ -152,7 +152,7 @@ int main() {
 	srand(time(0)); system("clear");
 
 	PriceList pl(rand(), 0.05f, 0.1f, 0.2f); OptionsLists ol(rand());
-	Game session(rand(), 9, 0, 0.4f, 0, false, 0); session.setupField(); session.drawState();
+	Game session(rand(), 9, 0, 0.4f, 0, false, 0); session.setupField();
 
 	while(!abort) {
 		if(!session.getPhase()) {
@@ -201,16 +201,18 @@ void Game::setupField() {
 	field[8*dim+8].setT(true);
 
         target.setId(rand());
-        target.setCoords(dim/2+1, dim/2+1);
+        target.setCoords(5, 5);
         target.setHp(10.0f);
 };
 
-void Game::drawState() {
+int Game::drawState() {
 	// RESET: \u001b[0m
 	// RED: \u001b[31m
 	// GREEN: \u001b[32m
 	// YELLOW: \u001b[33m
 	// BLUE: \u001b[34m
+
+	bool drawed;
 
 	for(int i = 0; i < dim; i++) {
 		for(int k = 0; k < 14; k++) {
@@ -218,17 +220,58 @@ void Game::drawState() {
                 }
 
 		for(int j = 0; j < dim; j++) {
-			if(j == target.getX()-1 && i == target.getY()-1) {
-				cout << "\u001b[34mH\u001b[0m";
-			} else if(field[i*dim+j].getT()) {
-				cout << "\u001b[33m~\u001b[0m";
-			} else {
-				cout << "\u001b[32m?\u001b[0m";
+			drawed = false;
+
+			for(int k = 0; k < nE; k++) {
+				if(enemies[k].getY()-1 == i && enemies[k].getX()-1 == i) {
+					cout << "\u001b[31mW\u001b[0m";
+
+					drawed = true;
+					break;
+				} else { continue; }
 			}
+
+			if(drawed) { continue; }
+
+			for(int k = 0; k < nT; k++) {
+				if(traps[k].getY()-1 == i && traps[k].getX()-1) {
+					if(!traps[k].getType()) {
+						cout << "\u001b[34m+\u001b[0m";
+					} else {
+						cout << "\u001b[31m#\u001b[0m";
+					}
+
+					drawed = true;
+					break;
+				} else { continue; }
+			}
+
+			if(drawed) { continue; }
+
+			for(int k = 0; k < nR; k++) {
+				if(rangers[k].getY()-1 == i && rangers[k].getX()-1 == j) {
+					cout << "\u001b[31mR\u001b[0m";
+
+					drawed = true;
+					break;
+				} else { continue; }
+			}
+
+			if(drawed) { continue; }
+
+			if(target.getX()-1 == j && target.getY()-1 == i) {
+                                cout << "\u001b[34mH\u001b[0m";
+                        } else if(field[i*dim+j].getT()) {
+                                cout << "\u001b[33m~\u001b[0m";
+                        } else {
+                                cout << "\u001b[32m?\u001b[0m";
+                        }
 		}
 
 		cout << '\n';
 	}
+
+	return 0;
 };
 
 // CONSTRUCTION OF ACTORS
@@ -237,7 +280,7 @@ void Game::addEnemies() {
 	// AT THIS STAGE OF DEVELOPMENT, I WILL JUST SPAWN 4 WOLVES THAT WILL
 	// RUN FROM DIFFERENT ENDS OF THE MAP TO THE CENTER
 
-	int spawns[4][2] = { {0, 0}, {0, 8}, {8, 0}, {8, 8} };
+	int spawns[4][2] = { {1, 1}, {1, 9}, {9, 1}, {9, 9} };
 
 	nE = 4;
 
@@ -479,6 +522,23 @@ void Game::printFinalStats() {
 
 void Game::calculatePaths() {
 	for(int i = 0; i < nE; i++) {
-		enemies[i].calculatePath(9, target.getX(), target.getY());
+		enemies[i].calculatePath(dim, target.getX(), target.getY());
+	}
+};
+
+void Game::displayPaths() {
+	unsigned int second = 1000000;
+
+	for(int k = 0; k < nE; k++) {
+		system("clear");
+
+		cout << "          Enemy: " << enemies[k].getId() << '\n';
+		cout << "-------------------------------------\n";
+
+		enemies[k].displayPath(dim, enemies[k].getX(), enemies[k].getY());
+
+		cout << "-------------------------------------\n";
+
+		usleep(5*second);
 	}
 };

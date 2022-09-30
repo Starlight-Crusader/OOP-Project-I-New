@@ -1,4 +1,7 @@
 #include <iostream>
+#include <unistd.h>
+
+using namespace std;
 
 // SUPERCLASS (ABSTRACT)
 
@@ -41,7 +44,10 @@ class Walker {
 
 	public: void makeStep();
 		void calculatePath();
-		void showPath();
+		void displayPath();
+
+		int getLen() { return lenOfPath; }
+		void setLen(int lV) { lenOfPath = lV; }
 };
 
 class Shooter {
@@ -79,7 +85,7 @@ class Enemy: public Entity, public Mortal, public Walker, public Damager {
 
 		void makeStep();
                 void calculatePath(int, int, int);
-		void showPath();
+		void displayPath(int, int, int);
 };
 
 class Trap: public Entity, public Defence, public Damager {
@@ -148,7 +154,9 @@ void Enemy::makeStep() {
 };
 
 void Enemy::calculatePath(int d, int tX, int tY) {
-	int fieldCopy[9][9]; int len = 0; int temp = 0; bool step;
+	unsigned int second = 1000000;
+	int fieldCopy[9][9]; int cX; int cY;
+	lenOfPath = 0;
 
 	for(int i = 0; i < d; i++) {
 		for(int j = 0; j < d; j++) {
@@ -178,42 +186,78 @@ void Enemy::calculatePath(int d, int tX, int tY) {
 	fieldCopy[8][0] = 0;
 	fieldCopy[8][8] = 0;
 
-	fieldCopy[y-1][x-1] = temp+1;
+	fieldCopy[y-1][x-1] = 1;
 
 	while(1) {
 		if(fieldCopy[tY][tX]) {
 			break;
 		}
 
-		temp++;
+		lenOfPath++;
 
 		for(int i = 0; i < d; i++) {
 			for(int j = 0; j < d; j++) {
-				if(fieldCopy[i][j] == temp) {
-					if(fieldCopy[i-1][j]) { fieldCopy[i-1][j] = temp + 1; }
-					if(fieldCopy[i+1][j]) { fieldCopy[i+1][j] = temp + 1; }
-					if(fieldCopy[i][j-1]) { fieldCopy[i][j-1] = temp + 1; }
-					if(fieldCopy[i][j+1]) { fieldCopy[i][j+1] = temp + 1; }
+				if(fieldCopy[i][j] == lenOfPath) {
+					if(!fieldCopy[i-1][j] && i > 0) { fieldCopy[i-1][j] = lenOfPath + 1; }
+					if(!fieldCopy[i+1][j] && i < 8) { fieldCopy[i+1][j] = lenOfPath + 1; }
+					if(!fieldCopy[i][j-1] && j > 0) { fieldCopy[i][j-1] = lenOfPath + 1; }
+					if(!fieldCopy[i][j+1] && j < 8) { fieldCopy[i][j+1] = lenOfPath + 1; }
 				}
 			}
 		}
 	}
 
-	len = temp; temp++;
+	path[0][1] = tX-1; path[0][0] = tY-1;
 
-	for(int k = 0; k < len; k++) {
-		step = false;
+	for(int i = 1; i < lenOfPath; i++) {
+		cX = path[i-1][1]; cY = path[i-1][0];
 
-		for(int i = 0; i < d; i++) {
-			for(int j = 0; j < d; j++) {
-				if(fieldCopy[i][j] == temp) {
-					path[k][0] = i + 1; path[k][1] = j + 1;
-					step = true; temp--;
+		if(fieldCopy[cY-1][cX] == fieldCopy[cY][cX]-1) {
+			path[i][0] = cY-1; path[i][1] = cX;
+
+		} else if(fieldCopy[cY+1][cX] == fieldCopy[cY][cX]-1) {
+			path[i][0] = cY+1; path[i][1] = cX;
+
+		} else if(fieldCopy[cY][cX-1] == fieldCopy[cY][cX]-1) {
+			path[i][0] = cY; path[i][1] = cX-1;
+
+		} else if(fieldCopy[cY][cX+1] == fieldCopy[cY][cX]-1){
+			path[i][0] = cY; path[i][1] = cX+1;
+		}
+	}
+
+	for(int i = 0; i < lenOfPath; i++) {
+		path[i][0]++; path[i][1]++;
+	}
+};
+
+void Enemy::displayPath(int d, int xE, int yE) {
+	bool part;
+
+	for(int i = 0; i < d; i++) {
+		for(int a = 0; a < 14; a++) {
+                	cout << ' ';
+                }
+
+		for(int j = 0; j < d; j++) {
+			part = false;
+
+			for(int k = 0; k < lenOfPath; k++) {
+				if(i == path[k][0]-1 && j == path[k][1]-1) {
+					part = true;
 					break;
 				}
 			}
 
-			if(step) { break; }
+			if(i == yE-1 && j == xE-1) {
+				cout << "\u001b[31mw\u001b[0m";
+			} else if(part) {
+				cout << "\u001b[31m~\u001b[0m";
+			} else {
+				cout << "\u001b[33m~\u001b[0m";
+			}
 		}
+
+		cout << '\n';
 	}
 };
