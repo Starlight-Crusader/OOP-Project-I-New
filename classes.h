@@ -150,7 +150,7 @@ class Tile: public Object {
 // SOME DECLARATIONS
 
 void Enemy::makeStep() {
-	x = path[lenOfPath-1][0]; y = path[lenOfPath-1][1]; lenOfPath--;
+	x = path[lenOfPath-1][1]; y = path[lenOfPath-1][0]; lenOfPath--;
 };
 
 void Enemy::calculatePath(int d, int tX, int tY) {

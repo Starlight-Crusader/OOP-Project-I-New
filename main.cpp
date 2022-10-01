@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
+#include <iomanip>
 
 #include "classes.h"
 
@@ -19,13 +20,13 @@ class Game: public Object {
 		// OBJECTS
 
 		Tile field[9*9]; int dim;
-		Enemy enemies[64]; int nE;
-		Trap traps[64]; int nT;
-		Ranger rangers[64]; int nR;
+		Enemy enemies[64]; int nE = 0;
+		Trap traps[64]; int nT = 0;
+		Ranger rangers[64]; int nR = 0;
 		Structure target;
 
 	public:
-		Game(int idV, int dimV, int rV, int mV, int pV, int aV, int kV) {
+		Game(int idV, int dimV, int rV, float mV, int pV, int aV, int kV) {
 			id = idV; dim = dimV; round = rV; money = mV; phase = pV; abort = aV; kills = kV;
 		}
 
@@ -35,6 +36,8 @@ class Game: public Object {
 		void addEnemies();
 		void addTrap(int, int, int);
 		void addRanger(int, int);
+
+		int sellDefender(int, int);
 
 		void enemiesMove();
 		void defendersMove();
@@ -50,11 +53,27 @@ class Game: public Object {
 		void displayPaths();
 
 		bool checkGO() {
-			if(target.getHp() <= 0) {
+			if(target.getHp() <= 0.0f) {
 				return true;
 			} else {
 				return false;
 			}
+		}
+
+		bool checkTrail(int xV, int yV) {
+			if(field[(yV-1)*dim+(xV-1)].getT()) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		bool checkOcc(int xV, int yV) {
+			if(field[(yV-1)*dim+(xV-1)].getOcc()) {
+                                return true;
+                        } else {
+                                return false;
+                        }
 		}
 
 		// GET- & SETTERS
@@ -65,7 +84,7 @@ class Game: public Object {
 		void setRound(int rV) { round = rV; }
 
 		float getM() { return money; }
-		void setM(int mV) { money = mV; }
+		void setM(float mV) { money = mV; }
 
 		int getE() { return nE; }
 		void setE(int eV) { nE = eV; }
@@ -80,7 +99,7 @@ class Game: public Object {
 		void setPhase(int pV) { phase = pV; }
 
 		bool getAbort() { return abort; }
-		void detAbort(int aV) { abort = aV; }
+		void setAbort(int aV) { abort = aV; }
 
 		int getK() { return kills; }
 		void setK(int kV) { kills = kV; }
@@ -90,11 +109,11 @@ class Game: public Object {
 
 class PriceList: public Object {
 	private:
-		float beartrap; float nest; float ranger;
+		float beartrap = 0.05f; float nest = 0.1f; float ranger = 0.2f;
 
 	public:
-		PriceList(int idV, int pB, int pN, int pR) {
-			id = idV; beartrap = pB; nest = pN; ranger = pR;
+		PriceList(int idV) {
+			id = idV;
 		}
 
 		float getBPrice() { return beartrap; }
@@ -115,14 +134,15 @@ class OptionsLists: public Object {
                         cout << "-------------------------------------\n";
                         cout << "          Select an action:\n";
 			cout << " 0. Highlight the paths of the en-s,\n";
-                        cout << " 1. Place a new beartrap (0.1$),\n";
-                        cout << " 2. Place a new nest (0.2$),\n";
-			cout << " 3. Hire a ranger (0.4$)";
+                        cout << " 1. Place a new beartrap (0.05$),\n";
+                        cout << " 2. Place a new nest (0.1$),\n";
+			cout << " 3. Hire a ranger (0.2$)\n";
                         cout << " 4. Sell a defender (50% back),\n";
                         cout << " 5. Start the next round,\n";
                         cout << " 6. Finish the game\n";
                         cout << "-------------------------------------\n";
                         cout << '\n';
+			cout << "OPTION: ";
 		}
 
 		void printOptionsBuy() {
@@ -149,19 +169,205 @@ class OptionsLists: public Object {
 };
 
 int main() {
-	srand(time(0)); system("clear");
+	int spawns[4][2] = { {1, 1}, {1, 9}, {9, 1}, {9, 9} };
+	int option1, option2, t; bool check;
+	unsigned int second = 1000000;
+	srand(time(0));
 
-	PriceList pl(rand(), 0.05f, 0.1f, 0.2f); OptionsLists ol(rand());
-	Game session(rand(), 9, 0, 0.4f, 0, false, 0); session.setupField();
+	PriceList pl(rand()); OptionsLists ol(rand());
+	Game session(rand(), 9, 0, 0.41f, 0, false, 0); session.setupField();
 
-	while(!abort) {
+	while(!session.getAbort()) {
 		if(!session.getPhase()) {
-			// PLANNING PHASE
+			system("clear");
+			session.addEnemies(); session.calculatePaths();
+			session.printPhase(); session.printStats();
+			session.drawState(); ol.printOptionsMain();
+
+			scanf("%i", &option1);
+			cout << '\n';
+
+			switch(option1) {
+				case 0: session.displayPaths(); break;
+				case 1:
+					if(!session.checkMoney(pl.getBPrice())) {
+						cout << "ERROR: You have not enough money!\n";
+						usleep(2*second);
+
+						break;
+					} else {
+						ol.printOptionsBuy();
+
+						scanf("%i %i", &option1, &option2);
+
+						if(option1 == 0 && option2 == 0) {
+                                                        break;
+                                                }
+
+						if(!session.checkTrail(option1, option2)) {
+							cout << "ERROR: You are not allowed to place traps in trees!\n";
+
+							usleep(2*second);
+							break;
+						}
+
+						if(session.checkOcc(option1, option2)) {
+							cout << "ERROR: This tile is not empty!\n";
+
+							usleep(2*second);
+							break;
+						}
+
+						check = false;
+						for(int i = 0; i < 4; i++) {
+							if(spawns[i][1] == option1 && spawns[i][0] == option2) {
+								cout << "ERROR: You are not allowed to place traps on the spawns!\n";
+								check = true;
+
+								usleep(2*second);
+							}
+
+							if(check) { break; }
+						}
+
+						if(check) {
+							break;
+						} else {
+							session.addTrap(0, option1, option2);
+	                                                session.setM(session.getM()-pl.getBPrice());
+
+							break;
+						}
+					}
+				case 2:
+					if(!session.checkMoney(pl.getNPrice())) {
+                                                cout << "ERROR: You have not enough money!\n";
+                                                usleep(2*second);
+
+						break;
+                                        } else {
+                                                ol.printOptionsBuy();
+
+                                                scanf("%i %i", &option1, &option2);
+
+                                                if(option1 == 0 && option2 == 0) {
+                                                        break;
+                                                }
+
+                                                if(!session.checkTrail(option1, option2)) {
+                                                        cout << "ERROR: You are not allowed to place traps in trees!\n";
+
+                                                        usleep(2*second);
+                                                        break;
+                                                }
+
+                                                if(session.checkOcc(option1, option2)) {
+                                                        cout << "ERROR: This tile is not empty!\n";
+
+                                                        usleep(2*second);
+                                                        break;
+                                                }
+
+                                                check = false;
+                                                for(int i = 0; i < 4; i++) {
+                                                        if(spawns[i][1] == option1 && spawns[i][0] == option2) {
+                                                                cout << "ERROR: You are not allowed to place traps on the spawns!\n";
+                                                                check = true;
+
+                                                                usleep(2*second);
+                                                        }
+
+                                                        if(check) { break; }
+                                                }
+
+						if(check) {
+                                                        break;
+                                                } else {
+                                                        session.addTrap(1, option1, option2);
+                                                        session.setM(session.getM()-pl.getNPrice());
+
+                                                        break;
+                                                }
+                                        }
+				case 3:
+					if(!session.checkMoney(pl.getRPrice())) {
+                                                cout << "ERROR: You have not enough money!\n";
+                                                usleep(2*second);
+
+						break;
+                                        } else {
+                                                ol.printOptionsBuy();
+
+                                                scanf("%i %i", &option1, &option2);
+
+                                                if(option1 == 0 && option2 == 0) {
+                                                        break;
+                                                }
+
+                                                if(session.checkTrail(option1, option2)) {
+                                                        cout << "ERROR: You have to place rangers in the trees!\n";
+
+                                                        usleep(2*second);
+                                                        break;
+                                                }
+
+                                                if(session.checkOcc(option1, option2)) {
+                                                        cout << "ERROR: This tile is not empty!\n";
+
+                                                        usleep(2*second);
+                                                        break;
+                                                }
+
+                                 		session.addRanger(option1, option2);
+                                                session.setM(session.getM()-pl.getRPrice());
+
+                                                break;
+                                        }
+				case 4:
+					ol.printOptionsSell();
+
+                                        scanf("%i %i", &option1, &option2);
+
+                                        if(option1 == 0 && option2 == 0) {
+                                        	break;
+                                        }
+
+					t = session.sellDefender(option1, option2);
+
+					switch(t) {
+						case 0: session.setM(session.getM()+pl.getBPrice()/2); break;
+						case 1: session.setM(session.getM()+pl.getNPrice()/2); break;
+						case 2: session.setM(session.getM()+pl.getRPrice()/2); break;
+						case -1: usleep(2*second); break;
+					}
+
+					break;
+				case 5:
+					session.setPhase(1); break;
+				case 6:
+					system("clear"); session.printFinalStats(); return 0;
+			}
 		} else {
-			// ACTION PHASE
+			while(session.getE() > 0) {
+				system("clear");
+				session.printPhase();
+				session.enemiesMove();
+				cout << '\n';
+				session.drawState();
+				usleep(1*second);
+
+				system("clear");
+				session.printPhase();
+				session.defendersMove();
+				cout << '\n';
+				session.drawState();
+				usleep(1*second);
+
+				session.checkFinish();
+			}
 		}
 
-		if(session.checkGO()) { break; }
+		if(session.checkGO()) { session.setAbort(true); }
 	}
 
 	return 0;
@@ -223,8 +429,8 @@ int Game::drawState() {
 			drawed = false;
 
 			for(int k = 0; k < nE; k++) {
-				if(enemies[k].getY()-1 == i && enemies[k].getX()-1 == i) {
-					cout << "\u001b[31mW\u001b[0m";
+				if(enemies[k].getY()-1 == i && enemies[k].getX()-1 == j) {
+					cout << "\u001b[31mw\u001b[0m";
 
 					drawed = true;
 					break;
@@ -234,11 +440,11 @@ int Game::drawState() {
 			if(drawed) { continue; }
 
 			for(int k = 0; k < nT; k++) {
-				if(traps[k].getY()-1 == i && traps[k].getX()-1) {
+				if(traps[k].getY()-1 == i && traps[k].getX()-1 == j) {
 					if(!traps[k].getType()) {
 						cout << "\u001b[34m+\u001b[0m";
 					} else {
-						cout << "\u001b[31m#\u001b[0m";
+						cout << "\u001b[34m#\u001b[0m";
 					}
 
 					drawed = true;
@@ -250,7 +456,7 @@ int Game::drawState() {
 
 			for(int k = 0; k < nR; k++) {
 				if(rangers[k].getY()-1 == i && rangers[k].getX()-1 == j) {
-					cout << "\u001b[31mR\u001b[0m";
+					cout << "\u001b[34mR\u001b[0m";
 
 					drawed = true;
 					break;
@@ -259,7 +465,7 @@ int Game::drawState() {
 
 			if(drawed) { continue; }
 
-			if(target.getX()-1 == j && target.getY()-1 == i) {
+			if(target.getY()-1 == i && target.getX()-1 == j) {
                                 cout << "\u001b[34mH\u001b[0m";
                         } else if(field[i*dim+j].getT()) {
                                 cout << "\u001b[33m~\u001b[0m";
@@ -295,10 +501,15 @@ void Game::addTrap(int tV, int xV, int yV) {
 			traps[nT].setup(rand(), xV, yV, 0, 2.0f, true);
 			nT++;
 
+			field[(yV-1)*dim+(xV-1)].setOcc(true);
+
 			break;
+
 		case 1:
 			traps[nT].setup(rand(), xV, yV, 1, 4.0f, true);
 			nT++;
+
+			field[(yV-1)*dim+(xV-1)].setOcc(true);
 
 			break;
 	}
@@ -307,6 +518,49 @@ void Game::addTrap(int tV, int xV, int yV) {
 void Game::addRanger(int xV, int yV) {
 	rangers[nR].setup(rand(), xV, yV, 4.0f, 1.5f, 2);
 	nR++;
+
+	field[(yV-1)*dim+(xV-1)].setOcc(true);
+};
+
+// SELLING OF ACTORS
+
+int Game::sellDefender(int xV, int yV) {
+	int type;
+
+	for(int i = 0; i < nT; i++) {
+		if(traps[i].getX() == xV && traps[i].getY() == yV) {
+			field[(yV-1)*dim+(xV-1)].setOcc(false);
+			type = traps[i].getType();
+
+			for(int k = i; k < nT-1; k++) {
+                        	traps[k].setup(traps[k+1].getId(),
+                                	traps[k+1].getX(), traps[k+1].getY(),
+                                        traps[k+1].getType(), traps[k+1].getDmg(),
+                                        traps[k+1].getArm());
+                        }
+
+                        nT--; return type;
+		}
+	}
+
+	for(int i = 0; i < nR; i++) {
+		if(rangers[i].getX() == xV && rangers[i].getY() == yV) {
+			field[(yV-1)*dim+(xV-1)].setOcc(false);
+                        type = 2;
+
+                        for(int k = i; k < nR-1; k++) {
+                        	rangers[k].setup(rangers[k+1].getId(),
+                                	rangers[k+1].getX(), rangers[k+1].getY(),
+                                        rangers[k+1].getDmg(), rangers[k+1].getRange(),
+                                        rangers[k+1].getBullets());
+                        }
+
+                        nR--; return type;
+                }
+	}
+
+	cout << "ERROR: Unable to find a defender with this coord-s!\n";
+	return -1;
 };
 
 // BALANCE CHECK UPON PURCHASE
@@ -420,6 +674,8 @@ void Game::defendersMove() {
 						traps[k+1].getArm());
                                 }
 
+				nT--;
+
 				destroyed = true;
 			} else { continue; }
 
@@ -442,6 +698,8 @@ void Game::defendersMove() {
                                                 rangers[k+1].getDmg(), rangers[k+1].getRange(),
 						rangers[k+1].getBullets());
                                 }
+
+				nR--;
 
                                 destroyed = true;
                         } else { continue; }
@@ -466,17 +724,19 @@ void Game::checkFinish() {
 
                                 cout << ">>> EVENT: ENEMY {id: " << enemies[i].getId() << "} has reached the TARGET {id: " << target.getId() << " <<<\n";
 
-                                for(int k = i; k < nR-1; k++) {
+                                for(int k = i; k < nE-1; k++) {
                                         enemies[k].setup(enemies[k+1].getId(),
                                                 enemies[k+1].getX(), enemies[k+1].getY(),
                                                 enemies[k+1].getHp(), enemies[k+1].getDmg(),
                                                 enemies[k+1].getReward());
                                 }
 
+				nE--;
+
                                 finished = true;
                         } else { continue; }
 
-                        if(finished) { break; }
+                        break;
                 }
 
                 if(!finished) { break; }
@@ -502,7 +762,7 @@ void Game::printStats() {
         cout << "               Stats:\n";
 	cout << " * Round: " << round + 1 << ",\n";
         cout << " * HP: " << target.getHp() << ",\n";
-        cout << " * Money: " << money << '\n';
+        cout << " * Money: " << money << "$\n";
         cout << "-------------------------------------\n";
         cout << '\n';
 };
@@ -532,13 +792,10 @@ void Game::displayPaths() {
 	for(int k = 0; k < nE; k++) {
 		system("clear");
 
-		cout << "          Enemy: " << enemies[k].getId() << '\n';
-		cout << "-------------------------------------\n";
+		cout << "\n          ENEMY: " << enemies[k].getId() << "\n\n";
 
 		enemies[k].displayPath(dim, enemies[k].getX(), enemies[k].getY());
 
-		cout << "-------------------------------------\n";
-
-		usleep(5*second);
+		usleep(4*second);
 	}
 };
