@@ -2,7 +2,7 @@
 <br><br>
 At the time of editing this file, we are facing <b>2 tasks</b>:<br>
 <b>1.</b> (L2) Creation of <b>10 classes</b> (taking into account <b>encapsulation</b>) that will <u>represent actors in a simulation</u>;<br>
-<b>2.</b> (L3) Create relatively <b>complex inheritance chains<b> that will contain examples of <b>two-level inheritance</b> and <b>multiple inheritance</b>. 
+<b>2.</b> (L3) Create relatively <b>complex inheritance chains</b> that will contain examples of <b>two-level inheritance</b> and <b>multiple inheritance</b>. 
 <br><br>
 I chose a simulation somewhat similar to <b>a tower defense</b>, but with some more complex mechanics.<br>
 <b>The purpose of the game</b>: <b>to prevent opponents</b> (within the lore: wolves, werewolves, etc.) <b>from<br> 
