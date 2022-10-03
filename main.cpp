@@ -354,7 +354,7 @@ int main() {
 				session.enemiesMove();
 				cout << '\n';
 				session.drawState();
-				usleep(1*second);
+				// usleep(1*second);
 
 				system("clear");
 				session.printPhase();
@@ -365,10 +365,15 @@ int main() {
 
 				session.checkFinish();
 			}
+
+			session.setPhase(0);
+			session.setR(session.getR()+1);
 		}
 
 		if(session.checkGO()) { session.setAbort(true); }
 	}
+
+	system("clear"); session.printFinalStats();
 
 	return 0;
 };
@@ -579,12 +584,13 @@ void Game::enemiesMove() {
 	for(int i = 0; i < nE; i++) {
 		enemies[i].makeStep();
 
-		cout << ">>> EVENT: Enemy {id: " << enemies[i].getId() << "} made a step towards the target <<<\n";
+		// cout << ">>> EVENT: Enemy {id: " << enemies[i].getId() << "} made a step towards the target <<<\n";
 	}
 };
 
 void Game::defendersMove() {
 	bool destroyed;
+	unsigned int second = 1000000;
 
 	// CHECK TRAPS
 
@@ -596,8 +602,8 @@ void Game::defendersMove() {
 				enemies[j].setHp(enemies[j].getHp()-traps[i].getDmg());
 				traps[i].setArm(false);
 
-				cout << ">>> EVENT: TRAP {id: " << traps[i].getId() << "} was triggered by ENEMY {id: " << enemies[j].getId() << "} <<<\n";
-				cout << ">>> EVENT: TRAP {id: " << traps[i].getId() << "} was disarmed <<<\n";
+				// cout << ">>> EVENT: TRAP {id: " << traps[i].getId() << "} was triggered by ENEMY {id: " << enemies[j].getId() << "} <<<\n";
+				// cout << ">>> EVENT: TRAP {id: " << traps[i].getId() << "} was disarmed <<<\n";
 
 				if(enemies[j].getHp() <= 0) {
 					money += enemies[j].getReward();
@@ -610,6 +616,7 @@ void Game::defendersMove() {
 							enemies[k+1].getX(), enemies[k+1].getY(),
 							enemies[k+1].getHp(), enemies[k+1].getDmg(),
 							enemies[k+1].getReward());
+						enemies[k].calculatePath(dim, target.getX(), target.getY());
 					}
 
 					nE--;
@@ -632,20 +639,22 @@ void Game::defendersMove() {
 				enemies[j].setHp(enemies[j].getHp()-rangers[i].getDmg());
 				rangers[i].setBullets(rangers[i].getBullets()-1);
 
-				cout << ">>> EVENT: RANGER {id: " << rangers[i].getId() << "shot at ENEMY {id: " << enemies[j].getId() << "} <<<\n";
-				cout << ">>> EVENT: RANGER {id: " << rangers[i].getId() << "spend 1 bullet; bullets left: " << rangers[i].getBullets() << "<<<\n";
+				// cout << ">>> EVENT: RANGER {id: " << rangers[i].getId() << "shot at ENEMY {id: " << enemies[j].getId() << "} <<<\n";
+				// cout << ">>> EVENT: RANGER {id: " << rangers[i].getId() << "spend 1 bullet; bullets left: " << rangers[i].getBullets() << "<<<\n";
+				// usleep(3*second);
 
 				if(enemies[j].getHp() <= 0) {
                                 	money += enemies[j].getReward();
 					kills++;
 
-                                	cout << ">>> EVENT: ENEMY {id: " << enemies[j].getId() << "} was killed <<<\n";
+                                	// cout << ">>> EVENT: ENEMY {id: " << enemies[j].getId() << "} was killed <<<\n";
 
                                 	for(int k = j; k < nE-1; k++) {
                                         	enemies[k].setup(enemies[k+1].getId(),
                                                 	enemies[k+1].getX(), enemies[k+1].getY(),
                                                 	enemies[k+1].getHp(), enemies[k+1].getDmg(),
                                                 	enemies[k+1].getReward());
+						enemies[k].calculatePath(dim, target.getX(), target.getY());
 					}
 
                                 	nE--;
@@ -660,12 +669,14 @@ void Game::defendersMove() {
 
 	// DESTROY DISARMED TRAPS & EMPTY RANGERS
 
-	while(1) {
+	destroyed = true;
+
+	while(destroyed) {
 		destroyed = false;
 
 		for(int i = 0; i < nT; i++) {
 			if(!traps[i].getArm()) {
-				cout << ">>> LOG: TRAP {id: " << traps[i].getId() << "} was destroyed <<<\n";
+				// cout << ">>> LOG: TRAP {id: " << traps[i].getId() << "} was destroyed <<<\n";
 
 				for(int k = i; k < nT-1; k++) {
                                 	traps[k].setup(traps[k+1].getId(),
@@ -676,21 +687,19 @@ void Game::defendersMove() {
 
 				nT--;
 
-				destroyed = true;
+				destroyed = true; break;
 			} else { continue; }
-
-			if(destroyed) {	break; }
 		}
-
-		if(!destroyed) { break; }
 	}
 
-	while(1) {
+	destroyed = true;
+
+	while(destroyed) {
                 destroyed = false;
 
                 for(int i = 0; i < nR; i++) {
-                        if(!rangers[i].checkBullets()) {
-                                cout << ">>> LOG: RANGER {id: " << rangers[i].getId() << "} was destroyed <<<\n";
+                        if(rangers[i].checkBullets() <= 0) {
+                                // cout << ">>> LOG: RANGER {id: " << rangers[i].getId() << "} was destroyed <<<\n";
 
                                 for(int k = i; k < nR-1; k++) {
                                         rangers[k].setup(rangers[k+1].getId(),
@@ -701,21 +710,17 @@ void Game::defendersMove() {
 
 				nR--;
 
-                                destroyed = true;
+                                destroyed = true; break;
                         } else { continue; }
-
-                        if(destroyed) { break; }
                 }
-
-                if(!destroyed) { break; }
         }
 };
 
 void Game::checkFinish() {
 	float damage = 0.0f;
-	bool finished;
+	bool finished = true;
 
-	while(1) {
+	while(finished) {
 		finished = false;
 
 		for(int i = 0; i < nE; i++) {
@@ -729,17 +734,14 @@ void Game::checkFinish() {
                                                 enemies[k+1].getX(), enemies[k+1].getY(),
                                                 enemies[k+1].getHp(), enemies[k+1].getDmg(),
                                                 enemies[k+1].getReward());
+					enemies[k].calculatePath(dim, target.getX(), target.getY());
                                 }
 
 				nE--;
 
-                                finished = true;
+                                finished = true; break;
                         } else { continue; }
-
-                        break;
                 }
-
-                if(!finished) { break; }
 	}
 
 	target.setHp(target.getHp()-damage);

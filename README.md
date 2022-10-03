@@ -14,7 +14,7 @@ most defensive units are designed to be installed directly in the path of moveme
 <br><br>
 ![Class Diagram](class-diagram.png)
 <br><br>
-I have created <b>14 classes</b> organized in the above structure.<br>
+I have created <b>15 classes</b> organized in the above structure.<br>
 All classes can be defined in <b>3 groups (+ superclass)</b>:
 <b>1.</b><i>'Actors'</i>: entities inside the simulation in which <b>the parameters</b> of the creatures and <b>the methods</b><br>
 by which they interact with the game and with each other are declared.

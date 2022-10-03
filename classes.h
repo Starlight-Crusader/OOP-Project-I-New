@@ -79,7 +79,7 @@ class Enemy: public Entity, public Mortal, public Walker, public Damager {
 	public: float getReward() { return reward; }
 		void setReward(float rV) { reward = rV; }
 
-		void setup(int idV, int xV, int yV, int hpV, int dmgV, int rV) {
+		void setup(int idV, int xV, int yV, int hpV, int dmgV, float rV) {
 			id = idV; x = xV; y = yV; hp = hpV; dmg = dmgV; reward = rV;
 		}
 
