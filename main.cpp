@@ -425,10 +425,22 @@ int Game::drawState() {
 
 	bool drawed;
 
+	for(int k = 0; k < 14; k++) {
+        	cout << ' ';
+        }
+
+	for(int k = 1; k < 10; k++) {
+		cout << k;
+	}
+
+	cout << '\n';
+
 	for(int i = 0; i < dim; i++) {
-		for(int k = 0; k < 14; k++) {
+		for(int k = 0; k < 12; k++) {
                 	cout << ' ';
                 }
+
+		cout << i + 1 << ' ';
 
 		for(int j = 0; j < dim; j++) {
 			drawed = false;
