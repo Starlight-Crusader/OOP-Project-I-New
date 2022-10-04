@@ -422,6 +422,8 @@ int Game::drawState() {
 	// GREEN: \u001b[32m
 	// YELLOW: \u001b[33m
 	// BLUE: \u001b[34m
+	// GREY: \u001b[37m
+
 
 	bool drawed;
 
@@ -447,7 +449,7 @@ int Game::drawState() {
 
 			for(int k = 0; k < nE; k++) {
 				if(enemies[k].getY()-1 == i && enemies[k].getX()-1 == j) {
-					cout << "\u001b[31mw\u001b[0m";
+					cout << "\u001b[37mw\u001b[0m";
 
 					drawed = true;
 					break;
