@@ -698,10 +698,10 @@ void Game::defendersMove() {
                 destroyed = false;
 
                 for(int i = 0; i < nR; i++) {
-                        if(rangers[i].checkBullets() <= 0) {
+                        if(!rangers[i].checkBullets()) {
                                 // cout << ">>> LOG: RANGER {id: " << rangers[i].getId() << "} was destroyed <<<\n";
 
-                                for(int k = i; k < nR-1; k++) {
+                                for(int k = i; k < nR; k++) {
                                         rangers[k].setup(rangers[k+1].getId(),
                                                 rangers[k+1].getX(), rangers[k+1].getY(),
                                                 rangers[k+1].getDmg(), rangers[k+1].getRange(),

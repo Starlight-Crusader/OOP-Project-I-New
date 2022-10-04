@@ -59,7 +59,7 @@ class Shooter {
 		void setBullets(int bV) { bullets = bV; }
 
 		bool checkBullets() {
-			if(bullets) {
+			if(bullets > 0) {
 				return true;
 			} else {
 				return false;
