@@ -175,7 +175,7 @@ int main() {
 	srand(time(0));
 
 	PriceList pl(rand()); OptionsLists ol(rand());
-	Game session(rand(), 9, 0, 0.41f, 0, false, 0); session.setupField();
+	Game session(rand(), 9, 1, 0.41f, 0, false, 0); session.setupField();
 
 	while(!session.getAbort()) {
 		if(!session.getPhase()) {
@@ -367,7 +367,7 @@ int main() {
 			}
 
 			session.setPhase(0);
-			session.setR(session.getR()+1);
+			session.setRound(session.getRound()+1);
 		}
 
 		if(session.checkGO()) { session.setAbort(true); }
@@ -621,7 +621,7 @@ void Game::defendersMove() {
 					money += enemies[j].getReward();
 					kills++;
 
-					cout << ">>> EVENT: ENEMY {id: " << enemies[j].getId() << "} was killed <<<\n";
+					// cout << ">>> EVENT: ENEMY {id: " << enemies[j].getId() << "} was killed <<<\n";
 
 					for(int k = j; k < nE-1; k++) {
 						enemies[k].setup(enemies[k+1].getId(),
@@ -774,7 +774,7 @@ void Game::printStats() {
 	cout << '\n';
         cout << "-------------------------------------\n";
         cout << "               Stats:\n";
-	cout << " * Round: " << round + 1 << ",\n";
+	cout << " * Round: " << round << ",\n";
         cout << " * HP: " << target.getHp() << ",\n";
         cout << " * Money: " << money << "$\n";
         cout << "-------------------------------------\n";
