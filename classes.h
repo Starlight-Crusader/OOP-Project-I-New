@@ -42,9 +42,9 @@ class Mortal {
 class Walker {
 	protected: int path[32][2]; int lenOfPath;
 
-	public: void makeStep();
-		void calculatePath();
-		void displayPath();
+	public: virtual void makeStep();
+		virtual void calculatePath();
+		virtual void displayPath();
 
 		int getLen() { return lenOfPath; }
 		void setLen(int lV) { lenOfPath = lV; }
@@ -68,7 +68,7 @@ class Shooter {
 };
 
 class Defence {
-	public: int trigger();
+	public: virtual int trigger();
 };
 
 // ACTORS CLASSES
