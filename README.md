@@ -16,9 +16,9 @@ most defensive units are designed to be installed directly in the path of moveme
 <br><br>
 I have created <b>15 classes</b> organized in the above structure.<br>
 All classes can be defined in <b>3 groups (+ superclass)</b>:<br>
-<b>1.</b><i>'Actors'</i>: entities inside the simulation in which <b>the parameters</b> of the creatures and <b>the methods</b><br>
+<b>1.</b> <i>Actors</i> : entities inside the simulation in which <b>the parameters</b> of the creatures and <b>the methods</b><br>
 by which they interact with the game and with each other are declared.<br>
-<b>2.</b><i>'Properties'</i>: These are abstract classes in which <b>parameters and some methods are embedded</b>,<br>
+<b>2.</b> <i>Properties</i> : These are abstract classes in which <b>parameters and some methods are embedded</b>,<br>
 which will be used by 'actors' as a result of <b>inheritance</b>.<br>
-<b>3.</b><i>'Game functionality'</i>: These classes declare methods for working with the console, <b>game constants</b>,<br>
+<b>3.</b> <i>Game functionality</i> : These classes declare methods for working with the console, <b>game constants</b>,<br>
 <b>statistics</b>, and so on.
