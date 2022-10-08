@@ -42,9 +42,9 @@ class Mortal {
 class Walker {
 	protected: int path[32][2]; int lenOfPath;
 
-	public: virtual void makeStep();
-		virtual void calculatePath();
-		virtual void displayPath();
+	public: void makeStep();
+		void calculatePath();
+		void displayPath();
 
 		int getLen() { return lenOfPath; }
 		void setLen(int lV) { lenOfPath = lV; }
@@ -68,7 +68,7 @@ class Shooter {
 };
 
 class Defence {
-	public: virtual int trigger();
+	public: int trigger();
 };
 
 // ACTORS CLASSES
@@ -102,10 +102,14 @@ class Trap: public Entity, public Defence, public Damager {
 		}
 
 		int trigger(int xV, int yV) {
-			if(x == xV && y == yV) {
-				return dmg;
-			} else {
-				return 0;
+			if(type == 0) {
+				if(xV == x && yV == y) {
+					return 1;
+				} else { return 0; }
+			} else if(type == 1) {
+				if((x-xV)*(x-xV) + (y-yV)*(y-yV) <= 1.5*1.5) {
+					return 1;
+				} else { return 0; }
 			}
 		}
 };
@@ -118,7 +122,7 @@ class Ranger: public Entity, public Defence, public Damager, public Shooter {
 
 		int trigger(int xV, int yV) {
 			if((x-xV)*(x-xV) + (y-yV)*(y-yV) <= range*range) {
-				return dmg;
+				return 1;
 			} else {
 				return 0;
 			}
