@@ -9,7 +9,7 @@ class Object {
 	protected: int id;
 
 	public: int getId() { return id; }
-                void setId(int val) { id = val; }
+            void setId(int val) { id = val; }
 };
 
 
@@ -19,8 +19,8 @@ class Entity: public Object {
 	protected: int x, y;
 
 	public: int getX() { return x; }
-                int getY() { return y; }
-		void setCoords(int newX, int newY) { x = newX; y = newY; }
+            int getY() { return y; }
+			void setCoords(int newX, int newY) { x = newX; y = newY; }
 };
 
 // PROPERTIES CLASSES (ABSTRACT)
@@ -29,46 +29,46 @@ class Damager {
 	protected: float dmg;
 
 	public:	float getDmg() { return dmg; }
-		void setDmg(float val) { dmg = val; }
+			void setDmg(float val) { dmg = val; }
 };
 
 class Mortal {
 	protected: float hp;
 
 	public:	float getHp() { return hp; }
-		void setHp(float val) { hp = val; }
+			void setHp(float val) { hp = val; }
 };
 
 class Walker {
 	protected: int path[32][2]; int lenOfPath;
 
-	public: void makeStep();
-		void calculatePath();
-		void displayPath();
+	public: virtual void makeStep();
+		    virtual void calculatePath();
+			virtual void displayPath();
 
-		int getLen() { return lenOfPath; }
-		void setLen(int lV) { lenOfPath = lV; }
+			int getLen() { return lenOfPath; }
+			void setLen(int lV) { lenOfPath = lV; }
 };
 
 class Shooter {
-        protected: float range; int bullets;
+    protected: float range; int bullets;
 
-        public:	float getRange() { return range; }
-		void setRange(float val) { range = val; }
-		int getBullets() { return bullets; }
-		void setBullets(int bV) { bullets = bV; }
+    public:	float getRange() { return range; }
+			void setRange(float val) { range = val; }
+			int getBullets() { return bullets; }
+			void setBullets(int bV) { bullets = bV; }
 
-		bool checkBullets() {
-			if(bullets > 0) {
-				return true;
-			} else {
-				return false;
+			bool checkBullets() {
+				if(bullets > 0) {
+					return true;
+				} else {
+					return false;
+				}
 			}
-		}
 };
 
 class Defence {
-	public: int trigger();
+	public: virtual int trigger();
 };
 
 // ACTORS CLASSES
