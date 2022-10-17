@@ -424,7 +424,6 @@ int Game::drawState() {
 	// BLUE: \u001b[34m
 	// GREY: \u001b[37m
 
-
 	bool drawed;
 
 	for(int k = 0; k < 14; k++) {
