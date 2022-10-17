@@ -42,9 +42,9 @@ class Mortal {
 class Walker {
 	protected: int path[32][2]; int lenOfPath;
 
-	public: virtual void makeStep();
-		    virtual void calculatePath();
-			virtual void displayPath();
+	public: void makeStep();
+		void calculatePath();
+		void displayPath();
 
 			int getLen() { return lenOfPath; }
 			void setLen(int lV) { lenOfPath = lV; }
@@ -67,8 +67,8 @@ class Shooter {
 			}
 };
 
-class Defence {
-	public: virtual int trigger();
+class Defender {
+	public: int trigger();
 };
 
 // ACTORS CLASSES
@@ -88,7 +88,7 @@ class Enemy: public Entity, public Mortal, public Walker, public Damager {
 		void displayPath(int, int, int);
 };
 
-class Trap: public Entity, public Defence, public Damager {
+class Trap: public Entity, public Defender, public Damager {
 	protected: int type; bool armed;
 
 	public: int getType() { return type; }
@@ -114,7 +114,7 @@ class Trap: public Entity, public Defence, public Damager {
 		}
 };
 
-class Ranger: public Entity, public Defence, public Damager, public Shooter {
+class Ranger: public Entity, public Defender, public Damager, public Shooter {
 	public:
 		void setup(int idV, int xV, int yV, int dmgV, int rV, int bV) {
 			id = idV; x = xV; y = yV; dmg = dmgV; range = rV; bullets = bV;
@@ -129,7 +129,7 @@ class Ranger: public Entity, public Defence, public Damager, public Shooter {
 		}
 };
 
-class Structure: public Entity, public Defence, public Mortal {
+class Structure: public Entity, public Defender, public Mortal {
 	public:
 		int trigger(int xV, int yV) {
 			if(x == xV && y == yV) {
