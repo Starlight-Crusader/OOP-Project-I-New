@@ -131,6 +131,21 @@ class Trap: public Entity, public Defender, public Damager {
 		}
 };
 
+class Bait: public Entity, public Defender, public Mortal {
+	public:
+		void setup(int idV, int xV, int yV, int hpV) {
+                        id = idV; x = xV; y = yV; hp = hpV;
+                }
+
+		int trigger(int xV, int yV) {
+			if(xV == x && yV == y) {
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+};
+
 class Ranger: public Entity, public Defender, public Damager, public Shooter {
 	public:
 		void setup(int idV, int xV, int yV, int dmgV, int rV, int bV) {

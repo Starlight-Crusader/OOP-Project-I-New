@@ -20,9 +20,10 @@ class Game: public Object {
 		// OBJECTS
 
 		Tile field[9*9]; int dim;
-		Enemy enemies[64]; int nE = 0;
-		Trap traps[64]; int nT = 0;
-		Ranger rangers[64]; int nR = 0;
+		Enemy enemies[16]; int nE = 0;
+		Trap traps[16]; int nT = 0;
+		Ranger rangers[16]; int nR = 0;
+		Bait baits[16]; int nB = 0;
 		Structure target;
 
 	public:
@@ -36,6 +37,7 @@ class Game: public Object {
 		void addEnemies();
 		void addTrap(int, int, int);
 		void addRanger(int, int);
+		void addBait(int, int);
 
 		int sellDefender(int, int);
 
@@ -137,9 +139,10 @@ class OptionsLists: public Object {
                         cout << " 1. Place a new beartrap (0.05$),\n";
                         cout << " 2. Place a new nest (0.1$),\n";
 			cout << " 3. Hire a ranger (0.2$)\n";
-                        cout << " 4. Sell a defender (50% back),\n";
-                        cout << " 5. Start the next round,\n";
-                        cout << " 6. Finish the game\n";
+			cout << " 4. Place a bait (free),\n";
+                        cout << " 5. Sell a defender (50% back),\n";
+                        cout << " 6. Start the next round,\n";
+                        cout << " 7. Finish the game\n";
                         cout << "-------------------------------------\n";
                         cout << '\n';
 			cout << "OPTION: ";
@@ -324,6 +327,31 @@ int main() {
                                                 break;
                                         }
 				case 4:
+					ol.printOptionsBuy();
+
+                                        scanf("%i %i", &option1, &option2);
+
+                                	if(option1 == 0 && option2 == 0) {
+                                        	break;
+                                        }
+
+                                        if(!session.checkTrail(option1, option2)) {
+                                        	cout << "ERROR: You have to place baits on in the roads!\n";
+
+                                                usleep(2*second);
+                                                break;
+                                        }
+
+                                        if(session.checkOcc(option1, option2)) {
+                                        	cout << "ERROR: This tile is not empty!\n";
+
+                                                usleep(2*second);
+                                               	break;
+                                        }
+
+                                        session.addBait(option1, option2);
+                                       	break;
+				case 5:
 					ol.printOptionsSell();
 
                                         scanf("%i %i", &option1, &option2);
@@ -338,13 +366,14 @@ int main() {
 						case 0: session.setM(session.getM()+pl.getBPrice()/2); break;
 						case 1: session.setM(session.getM()+pl.getNPrice()/2); break;
 						case 2: session.setM(session.getM()+pl.getRPrice()/2); break;
+						case 3: break;
 						case -1: usleep(2*second); break;
 					}
 
 					break;
-				case 5:
-					session.setPhase(1); break;
 				case 6:
+					session.setPhase(1); break;
+				case 7:
 					system("clear"); session.printFinalStats(); return 0;
 			}
 		} else {
@@ -483,6 +512,17 @@ int Game::drawState() {
 
 			if(drawed) { continue; }
 
+			for(int k = 0; k < nB; k++) {
+				if(baits[k].getY()-1 == i && baits[k].getX()-1 == j) {
+					cout << "\u001b[34m@\u001b[0m";
+
+					drawed = true;
+                                        break;
+				} else { continue; }
+			}
+
+			if(drawed) { continue; }
+
 			if(target.getY()-1 == i && target.getX()-1 == j) {
                                 cout << "\u001b[34mH\u001b[0m";
                         } else if(field[i*dim+j].getT()) {
@@ -540,6 +580,13 @@ void Game::addRanger(int xV, int yV) {
 	field[(yV-1)*dim+(xV-1)].setOcc(true);
 };
 
+void Game::addBait(int xV, int yV) {
+	baits[nB].setup(rand(), xV, yV, 1.0f);
+	nB++;
+
+	field[(yV-1)*dim+(xV-1)].setOcc(true);
+};
+
 // SELLING OF ACTORS
 
 int Game::sellDefender(int xV, int yV) {
@@ -577,6 +624,21 @@ int Game::sellDefender(int xV, int yV) {
                 }
 	}
 
+	for(int i = 0; i < nB; i++) {
+		if(baits[i].getX() == xV && baits[i].getY() == yV) {
+                        field[(yV-1)*dim+(xV-1)].setOcc(false);
+                        type = 3;
+
+                        for(int k = i; k < nB-1; k++) {
+                                baits[k].setup(baits[k+1].getId(),
+                                        baits[k+1].getX(), baits[k+1].getY(),
+                                        baits[k+1].getHp());
+                        }
+
+                        nB--; return type;
+                }
+	}
+
 	cout << "ERROR: Unable to find a defender with this coord-s!\n";
 	return -1;
 };
@@ -594,11 +656,51 @@ bool Game::checkMoney(float val) {
 // BASIC ACTIONS AND INTERATIONS OF ACTORS
 
 void Game::enemiesMove() {
-	for(int i = 0; i < nE; i++) {
-		enemies[i].makeStep();
+	bool delayed, devoured;
 
-		// cout << ">>> EVENT: Enemy {id: " << enemies[i].getId() << "} made a step towards the target <<<\n";
+	for(int i = 0; i < nE; i++) {
+		delayed = false;
+
+		for(int j = 0; j < nB; j++) {
+			if(baits[j].trigger(enemies[i].getX(), enemies[i].getY())) {
+				delayed = true;
+
+				baits[j].setHp(baits[j].getHp()-enemies[i].getDmg());
+			} else {
+				continue;
+			}
+		}
+
+		if(!delayed) {
+			enemies[i].makeStep();
+
+			// cout << ">>> EVENT: Enemy {id: " << enemies[i].getId() << "} made a step towards the target <<<\n";
+		} else { continue; }
 	}
+
+	devoured = true;
+
+	while(devoured) {
+                devoured = false;
+
+                for(int i = 0; i < nB; i++) {
+                        if(baits[i].getHp() <= 0.1f) {
+                                field[(baits[i].getY()-1)*dim+(baits[i].getX()-1)].setOcc(false);
+
+                                // cout << ">>> LOG: BAIT {id: " << baits[i].getId() << "} was devoured <<<\n";
+
+                                for(int k = i; k < nB-1; k++) {
+                                	baits[k].setup(baits[k+1].getId(),
+                                        	baits[k+1].getX(), baits[k+1].getY(),
+                                        	baits[k+1].getHp());
+                        	}
+
+                        	nB--;
+
+                                devoured = true; break;
+                        } else { continue; }
+                }
+        }
 };
 
 void Game::defendersMove() {
@@ -752,6 +854,8 @@ void Game::defendersMove() {
 
 		for(int i = 0; i < nT; i++) {
 			if(!traps[i].getArm()) {
+				field[(traps[i].getY()-1)*dim+(traps[i].getX()-1)].setOcc(false);
+
 				// cout << ">>> LOG: TRAP {id: " << traps[i].getId() << "} was destroyed <<<\n";
 
 				for(int k = i; k < nT-1; k++) {
@@ -775,6 +879,8 @@ void Game::defendersMove() {
 
                 for(int i = 0; i < nR; i++) {
                         if(!rangers[i].checkBullets()) {
+				field[(rangers[i].getY()-1)*dim+(rangers[i].getX()-1)].setOcc(false);
+
                                 // cout << ">>> LOG: RANGER {id: " << rangers[i].getId() << "} was destroyed <<<\n";
 
                                 for(int k = i; k < nR; k++) {
