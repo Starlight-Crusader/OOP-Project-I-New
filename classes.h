@@ -98,7 +98,7 @@ class Enemy: public Entity, public Mortal, public Walker, public Damager {
 		}
 
 		void makeStep();
-                void calculatePath(int, int, int);
+                void calculatePath(int, int, int, int, int);
 		void displayPath(int, int, int);
 };
 
@@ -191,7 +191,7 @@ void Enemy::makeStep() {
 	x = path[lenOfPath-1][1]; y = path[lenOfPath-1][0]; lenOfPath--;
 };
 
-void Enemy::calculatePath(int d, int tX, int tY) {
+void Enemy::calculatePath(int d, int tX, int tY, int fX, int fY) {
 	unsigned int second = 1000000;
 	int fieldCopy[9][9]; int cX; int cY;
 	lenOfPath = 0;
@@ -223,6 +223,10 @@ void Enemy::calculatePath(int d, int tX, int tY) {
 	fieldCopy[0][8] = 0;
 	fieldCopy[8][0] = 0;
 	fieldCopy[8][8] = 0;
+
+	if(!(fX > d && fY > d)) {
+                fieldCopy[fY-1][fX-1] = -1;
+        }
 
 	fieldCopy[y-1][x-1] = 1;
 

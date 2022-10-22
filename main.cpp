@@ -25,10 +25,12 @@ class Game: public Object {
 		Ranger rangers[16]; int nR = 0;
 		Bait baits[16]; int nB = 0;
 		Structure target;
+		Entity fence;
 
 	public:
 		Game(int idV, int dimV, int rV, float mV, int pV, int aV, int kV) {
 			id = idV; dim = dimV; round = rV; money = mV; phase = pV; abort = aV; kills = kV;
+			fence.setCoords(999, 999);
 		}
 
 		void setupField();
@@ -38,6 +40,7 @@ class Game: public Object {
 		void addTrap(int, int, int);
 		void addRanger(int, int);
 		void addBait(int, int);
+		void addFence(int, int);
 
 		int sellDefender(int, int);
 
@@ -140,9 +143,10 @@ class OptionsLists: public Object {
                         cout << " 2. Place a new nest (0.1$),\n";
 			cout << " 3. Hire a ranger (0.2$)\n";
 			cout << " 4. Place a bait (free),\n";
-                        cout << " 5. Sell a defender (50% back),\n";
-                        cout << " 6. Start the next round,\n";
-                        cout << " 7. Finish the game\n";
+			cout << " 5. Construct a fence (free),\n";
+                        cout << " 6. Sell a defender (50% back),\n";
+                        cout << " 7. Start the next round,\n";
+                        cout << " 8. Finish the game\n";
                         cout << "-------------------------------------\n";
                         cout << '\n';
 			cout << "OPTION: ";
@@ -352,6 +356,32 @@ int main() {
                                         session.addBait(option1, option2);
                                        	break;
 				case 5:
+					ol.printOptionsBuy();
+
+                                        scanf("%i %i", &option1, &option2);
+
+                                        if(option1 == 0 && option2 == 0) {
+                                                break;
+                                        }
+
+                                        if(!session.checkTrail(option1, option2)) {
+                                                cout << "ERROR: You have to place the fence on in the road!\n";
+
+                                                usleep(2*second);
+                                                break;
+                                        }
+
+                                        if(session.checkOcc(option1, option2)) {
+                                                cout << "ERROR: This tile is not empty!\n";
+
+                                                usleep(2*second);
+                                                break;
+                                        }
+
+                                        session.addFence(option1, option2);
+                                        session.calculatePaths();
+					break;
+				case 6:
 					ol.printOptionsSell();
 
                                         scanf("%i %i", &option1, &option2);
@@ -367,13 +397,14 @@ int main() {
 						case 1: session.setM(session.getM()+pl.getNPrice()/2); break;
 						case 2: session.setM(session.getM()+pl.getRPrice()/2); break;
 						case 3: break;
+						case 4: break;
 						case -1: usleep(2*second); break;
 					}
 
 					break;
-				case 6:
-					session.setPhase(1); break;
 				case 7:
+					session.setPhase(1); break;
+				case 8:
 					system("clear"); session.printFinalStats(); return 0;
 			}
 		} else {
@@ -523,6 +554,14 @@ int Game::drawState() {
 
 			if(drawed) { continue; }
 
+			if(fence.getY()-1 == i && fence.getX()-1 == j) {
+				cout << "\u001b[34m:\u001b[0m";
+
+                              	drawed = true;
+			}
+
+			if(drawed) { continue; }
+
 			if(target.getY()-1 == i && target.getX()-1 == j) {
                                 cout << "\u001b[34mH\u001b[0m";
                         } else if(field[i*dim+j].getT()) {
@@ -587,6 +626,18 @@ void Game::addBait(int xV, int yV) {
 	field[(yV-1)*dim+(xV-1)].setOcc(true);
 };
 
+void Game::addFence(int xV, int yV) {
+	if(fence.getX() != 999 && fence.getY() != 999) {
+		field[(fence.getY()-1)*dim+(fence.getX()-1)].setOcc(false);
+        	field[(fence.getY()-1)*dim+(fence.getX()-1)].setT(true);
+	}
+
+	fence.setCoords(xV, yV);
+
+	field[(yV-1)*dim+(xV-1)].setOcc(true);
+	field[(yV-1)*dim+(xV-1)].setT(false);
+};
+
 // SELLING OF ACTORS
 
 int Game::sellDefender(int xV, int yV) {
@@ -637,6 +688,16 @@ int Game::sellDefender(int xV, int yV) {
 
                         nB--; return type;
                 }
+	}
+
+	if(fence.getX() == xV && fence.getY() == yV) {
+		field[(yV-1)*dim+(xV-1)].setOcc(false);
+		field[(yV-1)*dim+(xV-1)].setT(true);
+
+		fence.setCoords(999, 999);
+		type = 4;
+
+		return type;
 	}
 
 	cout << "ERROR: Unable to find a defender with this coord-s!\n";
@@ -745,7 +806,7 @@ void Game::defendersMove() {
                                                         		enemies[k+1].getHp(), enemies[k+1].getDmg(),
                                                         		enemies[k+1].getReward());
 
-                                                		enemies[k].calculatePath(dim, target.getX(), target.getY());
+                                                		enemies[k].calculatePath(dim, target.getX(), target.getY(), fence.getX(), fence.getY());
 		                                        }
 
                 		                        nE--;
@@ -791,7 +852,7 @@ void Game::defendersMove() {
                                                                         	enemies[k+1].getHp(), enemies[k+1].getDmg(),
                                                                         	enemies[k+1].getReward());
 
-	                                                                enemies[k].calculatePath(dim, target.getX(), target.getY());
+	                                                                enemies[k].calculatePath(dim, target.getX(), target.getY(), fence.getX(), fence.getY());
         	                                                }
 
 	                                                        nE--;
@@ -832,7 +893,8 @@ void Game::defendersMove() {
                                                 	enemies[k+1].getX(), enemies[k+1].getY(),
                                                 	enemies[k+1].getHp(), enemies[k+1].getDmg(),
                                                 	enemies[k+1].getReward());
-						enemies[k].calculatePath(dim, target.getX(), target.getY());
+
+						enemies[k].calculatePath(dim, target.getX(), target.getY(), fence.getX(), fence.getY());
 					}
 
                                 	nE--;
@@ -916,7 +978,8 @@ void Game::checkFinish() {
                                                 enemies[k+1].getX(), enemies[k+1].getY(),
                                                 enemies[k+1].getHp(), enemies[k+1].getDmg(),
                                                 enemies[k+1].getReward());
-					enemies[k].calculatePath(dim, target.getX(), target.getY());
+
+					enemies[k].calculatePath(dim, target.getX(), target.getY(), fence.getX(), fence.getY());
                                 }
 
 				nE--;
@@ -966,7 +1029,7 @@ void Game::printFinalStats() {
 
 void Game::calculatePaths() {
 	for(int i = 0; i < nE; i++) {
-		enemies[i].calculatePath(dim, target.getX(), target.getY());
+		enemies[i].calculatePath(dim, target.getX(), target.getY(), fence.getX(), fence.getY());
 	}
 };
 
