@@ -520,7 +520,7 @@ int Game::drawState() {
 			for(int k = 0; k < nT; k++) {
 				if(traps[k].getY()-1 == i && traps[k].getX()-1 == j) {
 					if(!traps[k].getType()) {
-						cout << "\u001b[34m+\u001b[0m";
+						cout << "\u001b[34m@\u001b[0m";
 					} else {
 						cout << "\u001b[34m#\u001b[0m";
 					}
@@ -545,7 +545,7 @@ int Game::drawState() {
 
 			for(int k = 0; k < nB; k++) {
 				if(baits[k].getY()-1 == i && baits[k].getX()-1 == j) {
-					cout << "\u001b[34m@\u001b[0m";
+					cout << "\u001b[34m.\u001b[0m";
 
 					drawed = true;
                                         break;
