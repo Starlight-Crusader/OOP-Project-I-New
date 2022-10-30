@@ -4,6 +4,7 @@
 #include <iomanip>
 
 #include "classes.h"
+#include "generator.h"
 
 using namespace std;
 
@@ -26,6 +27,8 @@ class Game: public Object {
 		Bait baits[16]; int nB = 0;
 		Structure target;
 		Entity fence;
+
+		Generator fieldGenerator;
 
 	public:
 		Game(int idV, int dimV, int rV, float mV, int pV, int aV, int kV) {
@@ -181,8 +184,10 @@ int main() {
 	unsigned int second = 1000000;
 	srand(time(0));
 
+	Generator fieldGenerator;
+
 	PriceList pl(rand()); OptionsLists ol(rand());
-	Game session(rand(), 9, 1, 0.41f, 0, false, 0); session.setupField();
+	Game session(rand(), 16, 1, 0.41f, 0, false, 0); session.setupField();
 
 	while(!session.getAbort()) {
 		if(!session.getPhase()) {
@@ -441,6 +446,23 @@ int main() {
 // BASIC WORK WITH THE FIELD
 
 void Game::setupField() {
+	/*fieldGenerator.setupTiles();
+	fieldGenerator.generateField();
+
+	for(int i = 0; i < dim; i++) {
+		for(int j = 0; j < dim; j++) {
+			if(fieldGenerator.field[i][j] == -1) {
+				field[i*dim+j].setOcc(false);
+                        	field[i*dim+j].setT(false);
+                        	field[i*dim+j].setId(rand());
+			} else {
+				field[i*dim+j].setOcc(false);
+                                field[i*dim+j].setT(true);
+                                field[i*dim+j].setId(rand());
+			}
+		}
+	}*/
+
 	for(int i = 0; i < dim; i++) {
         	for(int j = 0; j < dim; j++) {
                 	field[i*dim+j].setOcc(false);
