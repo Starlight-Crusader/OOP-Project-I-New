@@ -48,7 +48,7 @@ class Mortal {
 
 class Walker {
 	protected:
-		int path[32][2]; int lenOfPath;
+		int path[64][2]; int lenOfPath;
 
 	public:
 		void makeStep();
@@ -98,7 +98,7 @@ class Enemy: public Entity, public Mortal, public Walker, public Damager {
 		}
 
 		void makeStep();
-                void calculatePath(int, int, int, int, int);
+                void calculatePath(int, int, int, int, int, int*);
 		void displayPath(int, int, int);
 };
 
@@ -191,47 +191,21 @@ void Enemy::makeStep() {
 	x = path[lenOfPath-1][1]; y = path[lenOfPath-1][0]; lenOfPath--;
 };
 
-void Enemy::calculatePath(int d, int tX, int tY, int fX, int fY) {
+void Enemy::calculatePath(int d, int tX, int tY, int fX, int fY, int *fieldSchema) {
 	unsigned int second = 1000000;
-	int fieldCopy[9][9]; int cX; int cY;
+	int fieldCopy[16][16]; int cX; int cY;
 	lenOfPath = 0;
-
+	
 	for(int i = 0; i < d; i++) {
 		for(int j = 0; j < d; j++) {
-			fieldCopy[i][j] = -1;
+			fieldCopy[i][j] = *(fieldSchema+i*d+j);
 		}
 	}
-
-	for(int i = 0; i < d; i++) {
-		fieldCopy[1][i] = 0;
-		fieldCopy[7][i] = 0;
-
-		fieldCopy[i][1] = 0;
-		fieldCopy[i][7] = 0;
-	}
-
-	for(int i = 3; i <= 5; i++) {
-		for(int j = 3; j <= 5; j++) {
-			fieldCopy[i][j] = 0;
-		}
-	}
-
-	fieldCopy[5][2] = 0;
-	fieldCopy[3][6] = 0;
-
-	fieldCopy[0][0] = 0;
-	fieldCopy[0][8] = 0;
-	fieldCopy[8][0] = 0;
-	fieldCopy[8][8] = 0;
-
-	if(!(fX > d && fY > d)) {
-                fieldCopy[fY-1][fX-1] = -1;
-        }
-
+	
 	fieldCopy[y-1][x-1] = 1;
 
 	while(1) {
-		if(fieldCopy[tY][tX]) {
+		if(fieldCopy[tY-1][tX-1] > 0) {
 			break;
 		}
 
@@ -240,10 +214,10 @@ void Enemy::calculatePath(int d, int tX, int tY, int fX, int fY) {
 		for(int i = 0; i < d; i++) {
 			for(int j = 0; j < d; j++) {
 				if(fieldCopy[i][j] == lenOfPath) {
-					if(!fieldCopy[i-1][j] && i > 0) { fieldCopy[i-1][j] = lenOfPath + 1; }
-					if(!fieldCopy[i+1][j] && i < 8) { fieldCopy[i+1][j] = lenOfPath + 1; }
-					if(!fieldCopy[i][j-1] && j > 0) { fieldCopy[i][j-1] = lenOfPath + 1; }
-					if(!fieldCopy[i][j+1] && j < 8) { fieldCopy[i][j+1] = lenOfPath + 1; }
+					if(i > 0) { if(fieldCopy[i-1][j] == 0) { fieldCopy[i-1][j] = lenOfPath + 1; } }	
+					if(i < d-1) { if(fieldCopy[i+1][j] == 0) { fieldCopy[i+1][j] = lenOfPath + 1; } }
+					if(j > 0) { if(fieldCopy[i][j-1] == 0) { fieldCopy[i][j-1] = lenOfPath + 1; } }
+					if(j < d-1) { if(fieldCopy[i][j+1] == 0) { fieldCopy[i][j+1] = lenOfPath + 1; } } 			
 				}
 			}
 		}

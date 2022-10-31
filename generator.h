@@ -80,14 +80,14 @@ class Generator {
 			}
 
 			/*
-				1111.111
+				111..111
 				1......1
 				111..1.1
-				..1....1
-				1....1..
+				..1.....
+				.....1..
 				1.1..111
 				1......1
-				111.1111
+				111..111
 			*/
 
 			for(int i = 0; i < 8; i++) {
@@ -97,26 +97,12 @@ class Generator {
                         }
 
 			for(int i = 0; i < 8; i++) {
-                                if(i != 4) {
+                                if(i != 4 && i !=  3) {
                                         tile3[0][i] = -1;
-                                }
-                        }
-
-			for(int i = 0; i < 8; i++) {
-                                if(i != 3) {
                                         tile3[7][i] = -1;
-                                }
-                        }
-
-			for(int i = 0; i < 8; i++) {
-                                if(i != 3) {
+                                        
                                         tile3[i][0] = -1;
-                                }
-                        }
-
-			for(int i = 0; i < 8; i++) {
-                                if(i != 4) {
-                                        tile3[i][7] = -1;
+                                        tile3[i][7] = -1;	
                                 }
                         }
 
@@ -218,7 +204,7 @@ class Generator {
 		}
 
 		void generateField() {
-			srand(time(NULL));
+			srand(time(0));
 
 			for(int i = 0; i < 16; i++) {
 				for(int j = 0; j < 16; j++) {

@@ -20,17 +20,22 @@ class Game: public Object {
 
 		// OBJECTS
 
-		Tile field[9*9]; int dim;
+		Tile field[16*16]; int dim;
 		Enemy enemies[16]; int nE = 0;
 		Trap traps[16]; int nT = 0;
 		Ranger rangers[16]; int nR = 0;
 		Bait baits[16]; int nB = 0;
 		Structure target;
 		Entity fence;
-
+		
+		// FIELD GENERATION
+		
 		Generator fieldGenerator;
-
+		int *schema { new int[256] {} };
+		
 	public:
+		int spawns[4][2];
+
 		Game(int idV, int dimV, int rV, float mV, int pV, int aV, int kV) {
 			id = idV; dim = dimV; round = rV; money = mV; phase = pV; abort = aV; kills = kV;
 			fence.setCoords(999, 999);
@@ -59,6 +64,8 @@ class Game: public Object {
 
 		void calculatePaths();
 		void displayPaths();
+
+		void setupSpawns();
 
 		bool checkGO() {
 			if(target.getHp() <= 0.0f) {
@@ -179,7 +186,6 @@ class OptionsLists: public Object {
 };
 
 int main() {
-	int spawns[4][2] = { {1, 1}, {1, 9}, {9, 1}, {9, 9} };
 	int option1, option2, t; bool check;
 	unsigned int second = 1000000;
 	srand(time(0));
@@ -187,11 +193,15 @@ int main() {
 	Generator fieldGenerator;
 
 	PriceList pl(rand()); OptionsLists ol(rand());
-	Game session(rand(), 16, 1, 0.41f, 0, false, 0); session.setupField();
+	Game session(rand(), 16, 1, 0.41f, 0, false, 0);
+	session.setupField();
+	
+	session.setupSpawns();
 
 	while(!session.getAbort()) {
 		if(!session.getPhase()) {
 			system("clear");
+
 			session.addEnemies(); session.calculatePaths();
 			session.printPhase(); session.printStats();
 			session.drawState(); ol.printOptionsMain();
@@ -232,7 +242,7 @@ int main() {
 
 						check = false;
 						for(int i = 0; i < 4; i++) {
-							if(spawns[i][1] == option1 && spawns[i][0] == option2) {
+							if(session.spawns[i][1] == option1 && session.spawns[i][0] == option2) {
 								cout << "ERROR: You are not allowed to place traps on the spawns!\n";
 								check = true;
 
@@ -282,7 +292,7 @@ int main() {
 
                                                 check = false;
                                                 for(int i = 0; i < 4; i++) {
-                                                        if(spawns[i][1] == option1 && spawns[i][0] == option2) {
+                                                        if(session.spawns[i][1] == option1 && session.spawns[i][0] == option2) {
                                                                 cout << "ERROR: You are not allowed to place traps on the spawns!\n";
                                                                 check = true;
 
@@ -433,9 +443,13 @@ int main() {
 
 			session.setPhase(0);
 			session.setRound(session.getRound()+1);
+			
+			if(session.checkGO()) { 
+				session.setAbort(true); 
+			} else {
+				session.setupSpawns();
+			}
 		}
-
-		if(session.checkGO()) { session.setAbort(true); }
 	}
 
 	system("clear"); session.printFinalStats();
@@ -446,7 +460,10 @@ int main() {
 // BASIC WORK WITH THE FIELD
 
 void Game::setupField() {
-	/*fieldGenerator.setupTiles();
+	bool placed = false;
+	int x, y;
+
+	fieldGenerator.setupTiles();
 	fieldGenerator.generateField();
 
 	for(int i = 0; i < dim; i++) {
@@ -461,41 +478,28 @@ void Game::setupField() {
                                 field[i*dim+j].setId(rand());
 			}
 		}
-	}*/
+	}
 
+	while(!placed) {
+		x = rand() % 8 + 5;
+		y = rand() % 8 + 5;
+
+		if(field[(y-1)*dim+(x-1)].getT()) {
+			field[(y-1)*dim+(x-1)].setOcc(true);
+
+			target.setId(rand());
+        		target.setCoords(x, y);
+        		target.setHp(10.0f);
+
+			placed = true;
+		} else { continue; }
+	}
+	
 	for(int i = 0; i < dim; i++) {
-        	for(int j = 0; j < dim; j++) {
-                	field[i*dim+j].setOcc(false);
-                       	field[i*dim+j].setT(false);
-                        field[i*dim+j].setId(rand());
-                }
-        }
-
-        for(int i = 0; i < dim; i++) {
-        	field[1*dim+i].setT(true);
-                field[7*dim+i].setT(true);
-
-                field[i*dim+1].setT(true);
-                field[i*dim+7].setT(true);
-        }
-
-        for(int i = 3; i <= 5 ; i++) {
-       		for(int j = 3; j <= 5; j++) {
-                	field[i*dim+j].setT(true);
-                }
-        }
-
-        field[5*dim+2].setT(true);
-        field[3*dim+6].setT(true);
-
-	field[0*dim+0].setT(true);
-	field[0*dim+8].setT(true);
-	field[8*dim+0].setT(true);
-	field[8*dim+8].setT(true);
-
-        target.setId(rand());
-        target.setCoords(5, 5);
-        target.setHp(10.0f);
+		for(int j = 0; j < dim; j++) {
+			*(schema+i*dim+j) = fieldGenerator.field[i][j];
+		}
+	}
 };
 
 int Game::drawState() {
@@ -508,22 +512,22 @@ int Game::drawState() {
 
 	bool drawed;
 
-	for(int k = 0; k < 14; k++) {
+	for(int k = 0; k < 10; k++) {
         	cout << ' ';
         }
 
-	for(int k = 1; k < 10; k++) {
-		cout << k;
+	for(int k = 1; k <= 16; k++) {
+		cout << k % 10;
 	}
 
 	cout << '\n';
 
 	for(int i = 0; i < dim; i++) {
-		for(int k = 0; k < 12; k++) {
+		for(int k = 0; k < 8; k++) {
                 	cout << ' ';
                 }
 
-		cout << i + 1 << ' ';
+		cout << (i + 1) % 10 << ' ';
 
 		for(int j = 0; j < dim; j++) {
 			drawed = false;
@@ -589,7 +593,7 @@ int Game::drawState() {
                         } else if(field[i*dim+j].getT()) {
                                 cout << "\u001b[33m~\u001b[0m";
                         } else {
-                                cout << "\u001b[32m?\u001b[0m";
+                                cout << "\u001b[32mt\u001b[0m";
                         }
 		}
 
@@ -601,12 +605,68 @@ int Game::drawState() {
 
 // CONSTRUCTION OF ACTORS
 
+void Game::setupSpawns() {
+	int valid;
+	int x, y;
+	
+	valid = false;
+
+	while(!valid) {
+		x = 1;
+		y = rand() % 16 + 1;
+
+		if(field[(y-1)*dim+(x-1)].getT()) {
+			spawns[0][1] = x;
+			spawns[0][0] = y;
+
+			valid = true;
+		}
+	}
+
+	valid = false;
+
+	while(!valid) {
+                x = 16;
+                y = rand() % 16 + 1;
+
+                if(field[(y-1)*dim+(x-1)].getT()) {
+                        spawns[1][1] = x;
+                        spawns[1][0] = y;
+
+                        valid = true;
+                }
+        }
+
+        valid = false;
+
+	while(!valid) {
+                x = rand() % 16 + 1;
+                y = 1;
+
+                if(field[(y-1)*dim+(x-1)].getT()) {
+                        spawns[2][1] = x;
+                        spawns[2][0] = y;
+
+                        valid = true;
+                }
+        }
+
+        valid = false;
+
+	while(!valid) {
+                x = rand() % 16 + 1;
+                y = 16;
+
+                if(field[(y-1)*dim+(x-1)].getT()) {
+                        spawns[3][1] = x;
+                        spawns[3][0] = y;
+
+                        valid = true;
+                }
+        }
+};
+
 void Game::addEnemies() {
-	// AT THIS STAGE OF DEVELOPMENT, I WILL JUST SPAWN 4 WOLVES THAT WILL
-	// RUN FROM DIFFERENT ENDS OF THE MAP TO THE CENTER
-
-	int spawns[4][2] = { {1, 1}, {1, 9}, {9, 1}, {9, 9} };
-
 	nE = 4;
 
 	for(int i = 0; i < nE; i++) {
@@ -828,7 +888,7 @@ void Game::defendersMove() {
                                                         		enemies[k+1].getHp(), enemies[k+1].getDmg(),
                                                         		enemies[k+1].getReward());
 
-                                                		enemies[k].calculatePath(dim, target.getX(), target.getY(), fence.getX(), fence.getY());
+                                                		enemies[k].calculatePath(dim, target.getX(), target.getY(), fence.getX(), fence.getY(), schema);
 		                                        }
 
                 		                        nE--;
@@ -874,7 +934,7 @@ void Game::defendersMove() {
                                                                         	enemies[k+1].getHp(), enemies[k+1].getDmg(),
                                                                         	enemies[k+1].getReward());
 
-	                                                                enemies[k].calculatePath(dim, target.getX(), target.getY(), fence.getX(), fence.getY());
+	                                                                enemies[k].calculatePath(dim, target.getX(), target.getY(), fence.getX(), fence.getY(), schema);
         	                                                }
 
 	                                                        nE--;
@@ -916,7 +976,7 @@ void Game::defendersMove() {
                                                 	enemies[k+1].getHp(), enemies[k+1].getDmg(),
                                                 	enemies[k+1].getReward());
 
-						enemies[k].calculatePath(dim, target.getX(), target.getY(), fence.getX(), fence.getY());
+						enemies[k].calculatePath(dim, target.getX(), target.getY(), fence.getX(), fence.getY(), schema);
 					}
 
                                 	nE--;
@@ -1001,7 +1061,7 @@ void Game::checkFinish() {
                                                 enemies[k+1].getHp(), enemies[k+1].getDmg(),
                                                 enemies[k+1].getReward());
 
-					enemies[k].calculatePath(dim, target.getX(), target.getY(), fence.getX(), fence.getY());
+					enemies[k].calculatePath(dim, target.getX(), target.getY(), fence.getX(), fence.getY(), schema);
                                 }
 
 				nE--;
@@ -1051,7 +1111,7 @@ void Game::printFinalStats() {
 
 void Game::calculatePaths() {
 	for(int i = 0; i < nE; i++) {
-		enemies[i].calculatePath(dim, target.getX(), target.getY(), fence.getX(), fence.getY());
+		enemies[i].calculatePath(dim, target.getX(), target.getY(), fence.getX(), fence.getY(), schema);
 	}
 };
 
@@ -1061,10 +1121,11 @@ void Game::displayPaths() {
 	for(int k = 0; k < nE; k++) {
 		system("clear");
 
-		cout << "\n          ENEMY: " << enemies[k].getId() << "\n\n";
+		cout << "\n            ENEMY: " << enemies[k].getId() << "\n\n";
 
 		enemies[k].displayPath(dim, enemies[k].getX(), enemies[k].getY());
 
 		usleep(4*second);
 	}
 };
+
