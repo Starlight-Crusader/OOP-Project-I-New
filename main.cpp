@@ -18,7 +18,7 @@ class Game: public Object {
 		bool abort;
 		int kills;
 
-		// OBJECTS
+		// ACTORS
 
 		Tile field[16*16]; int dim;
 		Enemy enemies[16]; int nE = 0;

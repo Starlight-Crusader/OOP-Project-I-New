@@ -1,0 +1,182 @@
+@startuml
+Object <|-- Entity
+Object <|-- Game
+Object <|-- Generator
+Object <|-- PriceList
+Object <|-- OptionsLists
+
+Entity <|-- Trap
+Entity <|-- Bait
+Entity <|-- Ranger
+Entity <|-- Structure
+Entity <|-- Tile
+Entity <|-- Enemy
+
+Damager <|-- Enemy
+Damager <|-- Trap
+Damager <|-- Ranger
+
+Defender <|-- Trap
+Defender <|-- Bait
+Defender <|-- Rager
+Defender <|-- Structure
+
+Mortal <|-- Enemy
+Mortal <|-- Structure
+Mortal <|-- Bait
+
+Trap --o Game
+Bait --o Game
+Ranger --o Game
+Structure --o Game
+Tile --o Game
+Enemy --o Game
+
+Walker <|-- Enemy
+Shooter <|-- Ranger
+
+abstract Object {
+ # id;
+}
+
+abstract Entity {
+ # int x;
+ # int y;
+}
+
+abstract Damager {
+ # float dmg;
+}
+
+abstract Mortal {
+ # float hp;
+}
+
+abstract Walker {
+ # int[][] path;
+ # int lenOfPath;
+
+ + void makeStep();
+ + void claculatePath();
+ + void displayPath();
+}
+
+abstract Shooter {
+ # float range;
+ # int bullets;
+
+ + bool checkBullets();
+}
+
+interface Defender {
+ + int trigger();
+}
+
+class Enemy {
+ # float reward;
+}
+
+class Trap {
+ # int type;
+ # bool armed;
+}
+
+class Bait {}
+
+class Ranger {}
+
+class Structure {}
+
+class Tile {
+ - bool occupied;
+ - bool trail;
+}
+
+class Game {
+ .. STATS ..
+ - int round;
+ - float money;
+ - int phase;
+ - bool abort;
+ - int kills;
+
+ + void printPhase();
+ + void printStats();
+ + void printFinalStats();
+
+ + bool checkMoney();
+
+ + bool checkGO();
+
+ .. ACTORS ..
+ - Tile[] field;
+ - int dim;
+ - Enemy[] enemies;
+ - int nE;
+ - Trap[] traps;
+ - int nT;
+ - Ranger[] rangers;
+ - int nR;
+ - Bait[] baits;
+ - int nB;
+ - Structure target;
+ - Entity fence;
+
+ + void setupField();
+ + int drawState();
+ 
+ + void addEnemies();
+ + void addTrap();
+ + void addRanger();
+ + void addBait();
+
+ + int sellDefender();
+
+ + void enemiesMove();
+ + void defendersMove();
+ + void checkFinish();
+
+ + void calculatePaths();
+ + void displayPath();
+
+ + void setupSpawns();
+
+ + bool checkTrail();
+ + bool checkOcc();
+
+ .. FIELD GENERATION ..
+ - Generator fieldGenerator;
+ - int *schema;
+
+ + int[][] spawns;
+}
+
+class PriceList {
+ - float beartrap;
+ - float nest;
+ - float ranger;
+}
+
+class OptionsLists {
+ + void printOptionsMain();
+ + void printOptionsBuy();
+ + void printOptionsSell();
+}
+
+class Generator {
+ .. TILE POOL ..
+ + int[][] tile1;
+ + int[][] tile2;
+ + int[][] tile3;
+ + int[][] tile4;
+
+ + void setuptiles();
+ + void drawTiles();
+
+ .. FIELD SCHEMA ..
+ + int[][] field;
+
+ + void generateField();
+ + void drawField();
+}
+@enduml

@@ -3,10 +3,11 @@
 #include <cstdlib>
 #include <stdlib.h>
 #include <time.h>
+#include <classes.h>
 
 using namespace std;
 
-class Generator {
+class Generator: public Object {
 	public:
 		int tile1[8][8], tile2[8][8], tile3[8][8], tile4[8][8];
 		int field[16][16];
