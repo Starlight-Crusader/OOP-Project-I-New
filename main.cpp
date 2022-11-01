@@ -27,12 +27,12 @@ class Game: public Object {
 		Bait baits[16]; int nB = 0;
 		Structure target;
 		Entity fence;
-		
+
 		// FIELD GENERATION
-		
+
 		Generator fieldGenerator;
 		int *schema { new int[256] {} };
-		
+
 	public:
 		int spawns[4][2];
 
@@ -195,7 +195,7 @@ int main() {
 	PriceList pl(rand()); OptionsLists ol(rand());
 	Game session(rand(), 16, 1, 0.41f, 0, false, 0);
 	session.setupField();
-	
+
 	session.setupSpawns();
 
 	while(!session.getAbort()) {
@@ -443,9 +443,9 @@ int main() {
 
 			session.setPhase(0);
 			session.setRound(session.getRound()+1);
-			
-			if(session.checkGO()) { 
-				session.setAbort(true); 
+
+			if(session.checkGO()) {
+				session.setAbort(true);
 			} else {
 				session.setupSpawns();
 			}
@@ -494,7 +494,7 @@ void Game::setupField() {
 			placed = true;
 		} else { continue; }
 	}
-	
+
 	for(int i = 0; i < dim; i++) {
 		for(int j = 0; j < dim; j++) {
 			*(schema+i*dim+j) = fieldGenerator.field[i][j];
@@ -512,7 +512,7 @@ int Game::drawState() {
 
 	bool drawed;
 
-	for(int k = 0; k < 10; k++) {
+	for(int k = 0; k < 11; k++) {
         	cout << ' ';
         }
 
@@ -523,7 +523,7 @@ int Game::drawState() {
 	cout << '\n';
 
 	for(int i = 0; i < dim; i++) {
-		for(int k = 0; k < 8; k++) {
+		for(int k = 0; k < 9; k++) {
                 	cout << ' ';
                 }
 
@@ -608,7 +608,7 @@ int Game::drawState() {
 void Game::setupSpawns() {
 	int valid;
 	int x, y;
-	
+
 	valid = false;
 
 	while(!valid) {
