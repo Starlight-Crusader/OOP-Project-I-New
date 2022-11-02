@@ -22,5 +22,5 @@ by which they interact with the game and with each other are declared.<br>
 <b>2.</b> <i>Properties</i> : These are abstract classes in which <b>parameters and some methods are embedded</b>,<br>
 which will be used by 'actors' as a result of <b>inheritance</b>.<br>
 <b>3.</b> <i>Game functionality</i> : These classes declare methods for working with the console, <b>game constants</b>,<br>
-<b>statistics</b>, and so on.
+<b>statistics</b>, and so on.<br>
 <b>4.</b> <i>Field generation<i> : This group contains only one class the program uses to generate <b>a big field from a pool of small tiles<b>. 

@@ -18,7 +18,7 @@ Damager <|-- Ranger
 
 Defender <|-- Trap
 Defender <|-- Bait
-Defender <|-- Rager
+Defender <|-- Ranger
 Defender <|-- Structure
 
 Mortal <|-- Enemy
@@ -31,6 +31,8 @@ Ranger --o Game
 Structure --o Game
 Tile --o Game
 Enemy --o Game
+
+Generator --o Game
 
 Walker <|-- Enemy
 Shooter <|-- Ranger
