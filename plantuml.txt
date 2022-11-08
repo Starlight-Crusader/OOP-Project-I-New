@@ -25,14 +25,14 @@ Mortal <|-- Enemy
 Mortal <|-- Structure
 Mortal <|-- Bait
 
-Trap --o Game
-Bait --o Game
-Ranger --o Game
-Structure --o Game
-Tile --o Game
-Enemy --o Game
+Trap --* Game
+Bait --* Game
+Ranger --* Game
+Structure --* Game
+Tile --* Game
+Enemy --* Game
 
-Generator --o Game
+Generator --* Game
 
 Walker <|-- Enemy
 Shooter <|-- Ranger
