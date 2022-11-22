@@ -39,7 +39,7 @@ class Data: public Object {
 		Entity fence;
 
     public:
-        int fieldStateSchema[dim*dim];
+        char fieldStateSchema[dim*dim];
 
         Data(int idV) {
             id = idV; roundV = 0; phase = 0; abortV = False; kills = 0;
@@ -75,8 +75,78 @@ class Data: public Object {
 };
 
 
-void Game::constructSchema() {
-    for(int i = 0; i < dim; i++) {
-        for(int i = 0; i < )
-    }
+int Data::constructSchema() {
+    bool conv;
+
+	for(int i = 0; i < dim; i++) {
+		for(int j = 0; j < dim; j++) {
+            conv = false;
+		
+            for(int k = 0; k < nE; k++) {
+				if(enemies[k].getY()-1 == i && enemies[k].getX()-1 == j) {
+					fieldStateSchema[i*dim+j] = 'w';
+
+					conv = true;
+					break;
+				} else { continue; }
+			}
+
+			if(conv) { continue; }
+
+			for(int k = 0; k < nT; k++) {
+				if(traps[k].getY()-1 == i && traps[k].getX()-1 == j) {
+					if(!traps[k].getType()) {
+						fieldStateSchema[i*dim+j] = '@';
+					} else {
+						fieldStateSchema[i*dim+j] = '#';
+					}
+
+					conv = true;
+					break;
+				} else { continue; }
+			}
+
+			if(conv) { continue; }
+
+			for(int k = 0; k < nR; k++) {
+				if(rangers[k].getY()-1 == i && rangers[k].getX()-1 == j) {
+					fieldStateSchema[i*dim+j] = 'R';
+
+					conv = true;
+					break;
+				} else { continue; }
+			}
+
+			if(conv) { continue; }
+
+			for(int k = 0; k < nB; k++) {
+				if(baits[k].getY()-1 == i && baits[k].getX()-1 == j) {
+					fieldStateSchema[i*dim+j] = '.';
+
+					conv = true;
+                    break;
+				} else { continue; }
+			}
+
+			if(conv) { continue; }
+
+			if(fence.getY()-1 == i && fence.getX()-1 == j) {
+				fieldStateSchema[i*dim+j] = ':';
+
+                conv = true;
+			}
+
+			if(conv) { continue; }
+
+			if(target.getY()-1 == i && target.getX()-1 == j) {
+                fieldStateSchema[i*dim+j] = 'H';
+            } else if(field[i*dim+j].getT()) {
+                fieldStateSchema[i*dim+j] = '~';
+            } else {
+                fieldStateSchema[i*dim+j] = 't';
+            }
+		}
+
+		cout << '\n';
+	}
 };

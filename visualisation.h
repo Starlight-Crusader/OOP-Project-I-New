@@ -63,6 +63,8 @@ int Visualisation::drawState(char *fieldStateSchema, int dim) {
                     cout << "\u001b[34m@\u001b[0m"; break;
                 case 'w':
                     cout << "\u001b[37mw\u001b[0m"; break;
+                case ':':
+                    cout << "\u001b[34m:\u001b[0m"; break;
             }
 		}
 
