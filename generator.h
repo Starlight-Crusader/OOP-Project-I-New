@@ -65,6 +65,10 @@ class Generator: public Object  {
     public:
         int field[16][16];
 
+        Generator(int idV) {
+            id = idV;
+        }
+
 	    void setupTiles();
 		void drawTiles();
 		void generateField();
