@@ -3,7 +3,8 @@ Object <|-- Entity
 Object <|-- Game
 Object <|-- Generator
 Object <|-- PriceList
-Object <|-- OptionsLists
+Object <|-- Simulation
+Object <|-- GUI
 
 Entity <|-- Trap
 Entity <|-- Bait
@@ -25,17 +26,20 @@ Mortal <|-- Enemy
 Mortal <|-- Structure
 Mortal <|-- Bait
 
-Trap --* Game
-Bait --* Game
-Ranger --* Game
-Structure --* Game
-Tile --* Game
-Enemy --* Game
-
-Generator --* Game
+Trap --* Simulation
+Bait --* Simulation
+Ranger --* Simulation
+Structure --* Simulation
+Tile --* Simulation
+Enemy --* Simulation
+Generator --* Simulation
 
 Walker <|-- Enemy
 Shooter <|-- Ranger
+
+GUI -- Game
+GUI -- Simulation
+PriceList -- Simulation
 
 abstract Object {
  # id;
@@ -90,42 +94,53 @@ class Ranger {}
 class Structure {}
 
 class Tile {
- - bool occupied;
- - bool trail;
+ + bool occupied;
+ + bool trail;
 }
 
 class Game {
  .. STATS ..
- - int round;
- - float money;
- - int phase;
- - bool abort;
- - int kills;
+ + int round;
+ + float money;
+ + int phase;
+ + bool abort;
+ + int kills;
+ 
+ 
+ + bool checkMoney();
+ + bool checkGO();
+}
 
+class GUI {
  + void printPhase();
  + void printStats();
  + void printFinalStats();
+ 
+ + void printOptionsMain();
+ + void printOptionsBuy();
+ + void printOptionsSell();
+ 
+ + int drawState();
 
- + bool checkMoney();
+ + void displayPath();
+}
 
- + bool checkGO();
-
+class Simulation {
  .. ACTORS ..
- - Tile[] field;
- - int dim;
- - Enemy[] enemies;
- - int nE;
- - Trap[] traps;
- - int nT;
- - Ranger[] rangers;
- - int nR;
- - Bait[] baits;
- - int nB;
- - Structure target;
- - Entity fence;
+ + Tile[] field;
+ + int dim;
+ + Enemy[] enemies;
+ + int nE;
+ + Trap[] traps;
+ + int nT;
+ + Ranger[] rangers;
+ + int nR;
+ + Bait[] baits;
+ + int nB;
+ + Structure target;
+ + Entity fence;
 
  + void setupField();
- + int drawState();
  
  + void addEnemies();
  + void addTrap();
@@ -139,7 +154,6 @@ class Game {
  + void checkFinish();
 
  + void calculatePaths();
- + void displayPath();
 
  + void setupSpawns();
 
@@ -157,12 +171,6 @@ class PriceList {
  - float beartrap;
  - float nest;
  - float ranger;
-}
-
-class OptionsLists {
- + void printOptionsMain();
- + void printOptionsBuy();
- + void printOptionsSell();
 }
 
 class Generator {
