@@ -23,12 +23,10 @@ class Simulation: public Object {
 		void defendersMove();
 		void checkFinish();
 
-		bool checkMoney(float);
-
+        void setupSpawns();
 		void calculatePaths();
 
-		void setupSpawns();
-
+        bool checkMoney(float);
         bool checkGO() {
 			if(target.getHp() <= 0.0f) {
 				return true;
