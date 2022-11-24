@@ -86,6 +86,22 @@ class Data: public Object {
 		float getRPrice() { return ranger; }
 
         void addEnemies();
+
+        bool checkTrail(int xV, int yV) {
+			if(field[(yV-1)*dim+(xV-1)].getT()) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		bool checkOcc(int xV, int yV) {
+			if(field[(yV-1)*dim+(xV-1)].getOcc()) {
+                return true;
+            } else {
+                return false;
+            }
+		}
 };
 
 
@@ -289,4 +305,72 @@ void Data::addFence(int xV, int yV) {
 
 	field[(yV-1)*dim+(xV-1)].setOcc(true);
 	field[(yV-1)*dim+(xV-1)].setT(false);
+};
+
+int Data::sellDefender(int xV, int yV) {
+	int type;
+
+	for(int i = 0; i < nT; i++) {
+		if(traps[i].getX() == xV && traps[i].getY() == yV) {
+			field[(yV-1)*dim+(xV-1)].setOcc(false);
+			type = traps[i].getType();
+
+			for(int k = i; k < nT-1; k++) {
+                traps[k].setup(traps[k+1].getId(),
+                    traps[k+1].getX(), traps[k+1].getY(),
+                    traps[k+1].getType(), traps[k+1].getDmg(),
+                    traps[k+1].getArm());
+            }
+
+            nT--; 
+                
+            return type;
+		}
+	}
+
+	for(int i = 0; i < nR; i++) {
+		if(rangers[i].getX() == xV && rangers[i].getY() == yV) {
+			field[(yV-1)*dim+(xV-1)].setOcc(false);
+            type = 2;
+
+            for(int k = i; k < nR-1; k++) {
+                rangers[k].setup(rangers[k+1].getId(),
+                    rangers[k+1].getX(), rangers[k+1].getY(),
+                    rangers[k+1].getDmg(), rangers[k+1].getRange(),
+                    rangers[k+1].getBullets());
+            }
+
+            nR--;
+            
+            return type;
+        }
+	}
+
+	for(int i = 0; i < nB; i++) {
+		if(baits[i].getX() == xV && baits[i].getY() == yV) {
+            field[(yV-1)*dim+(xV-1)].setOcc(false);
+            type = 3;
+
+            for(int k = i; k < nB-1; k++) {
+                baits[k].setup(baits[k+1].getId(),
+                    baits[k+1].getX(), baits[k+1].getY(),
+                    baits[k+1].getHp());
+            }
+
+            nB--; return type;
+        }
+	}
+
+	if(fence.getX() == xV && fence.getY() == yV) {
+		field[(yV-1)*dim+(xV-1)].setOcc(false);
+		field[(yV-1)*dim+(xV-1)].setT(true);
+
+		fence.setCoords(999, 999);
+		type = 4;
+
+		return type;
+	}
+
+	cout << "ERROR: Unable to find a defender with this coord-s!\n";
+	return -1;
 };
