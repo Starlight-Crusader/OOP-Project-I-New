@@ -4,9 +4,10 @@
 #include <iomanip>
 
 #include "classes.h"
-#include "simualtion.h"
-#include "visualisation.h"
+#include "logic.h"
+#include "graphics.h"
 #include "data.h"
+#include "generator.h"
 
 using namespace std;
 
@@ -14,23 +15,25 @@ using namespace std;
 int main() {
 	int option1, option2, t; bool check;
 	unsigned int second = 1000000;
+
 	srand(time(0));
+    
+    Logic logic(rand());
+    Graphics graphics(rand());
+    Data data(rand());
 
-	Generator fieldGenerator;
+	data.setupField();
+	logic.setupSpawns(&data);
 
-	PriceList pl(rand()); OptionsLists ol(rand());
-	Game session(rand(), 16, 1, 0.41f, 0, false, 0);
-	session.setupField();
-
-	session.setupSpawns();
-
-	while(!session.getAbort()) {
-		if(!session.getPhase()) {
+	while(!data.getAbort()) {
+		if(!data.getPhase()) {
 			system("clear");
 
-			session.addEnemies(); session.calculatePaths();
-			session.printPhase(); session.printStats();
-			session.drawState(); ol.printOptionsMain();
+			data.addEnemies(); logic.calculatePaths(&data);
+			graphics.printPhase(data.getPhase()); session.printStats(data.getRound(), data.target.getHp(), data.getM());
+			logic.constructSchema(&model); graphics.drawState(&logic.fieldStateSchema, model.dim); graphics.printOptionsMain();
+
+            // <-- STOPPED HERE
 
 			scanf("%i", &option1);
 			cout << '\n';

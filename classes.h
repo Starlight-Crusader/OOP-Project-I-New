@@ -100,7 +100,7 @@ class Enemy: public Entity, public Mortal, public Walker, public Damager {
 		}
 
 		void makeStep();
-                void calculatePath(int, int, int, int, int, int*);
+        void calculatePath(int, int, int, int, int, int*);
 		void displayPath(int, int, int);
 };
 
@@ -136,8 +136,8 @@ class Trap: public Entity, public Defender, public Damager {
 class Bait: public Entity, public Defender, public Mortal {
 	public:
 		void setup(int idV, int xV, int yV, int hpV) {
-                        id = idV; x = xV; y = yV; hp = hpV;
-                }
+            id = idV; x = xV; y = yV; hp = hpV;
+        }
 
 		int trigger(int xV, int yV) {
 			if(xV == x && yV == y) {

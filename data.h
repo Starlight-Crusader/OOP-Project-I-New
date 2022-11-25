@@ -27,7 +27,7 @@ class Data: public Object {
 
         // OTHERS
 
-        Generator fieldGenerator();
+        Generator fieldGenerator;
         int spawns[4][2];
 
     public:
@@ -51,12 +51,9 @@ class Data: public Object {
 		Structure target;
 		Entity fence;
 
-        char fieldStateSchema[dim*dim];
         int *fieldSchema { new int[256] {} };
 
         Data(int idV) {
-            srand(time(0));
-            
             id = idV; roundV = 0; phase = 0; abortV = False; kills = 0;
             fieldGenerator = new Generator(rand());
 
@@ -78,14 +75,11 @@ class Data: public Object {
 		int getK() { return kills; }
 		void setK(int kV) { kills = kV; }
 
-        void constructSchema();
-        void setupSpawns();
-
         float getBPrice() { return beartrap; }
 		float getNPrice() { return nest; }
 		float getRPrice() { return ranger; }
 
-        void addEnemies();
+        void setupField();
 
         bool checkTrail(int xV, int yV) {
 			if(field[(yV-1)*dim+(xV-1)].getT()) {
@@ -102,127 +96,14 @@ class Data: public Object {
                 return false;
             }
 		}
-};
 
-
-int Data::constructSchema() {
-    bool conv;
-
-	for(int i = 0; i < dim; i++) {
-		for(int j = 0; j < dim; j++) {
-            conv = false;
-		
-            for(int k = 0; k < nE; k++) {
-				if(enemies[k].getY()-1 == i && enemies[k].getX()-1 == j) {
-					fieldStateSchema[i*dim+j] = 'w';
-
-					conv = true;
-					break;
-				} else { continue; }
-			}
-
-			if(conv) { continue; }
-
-			for(int k = 0; k < nT; k++) {
-				if(traps[k].getY()-1 == i && traps[k].getX()-1 == j) {
-					if(!traps[k].getType()) {
-						fieldStateSchema[i*dim+j] = '@';
-					} else {
-						fieldStateSchema[i*dim+j] = '#';
-					}
-
-					conv = true;
-					break;
-				} else { continue; }
-			}
-
-			if(conv) { continue; }
-
-			for(int k = 0; k < nR; k++) {
-				if(rangers[k].getY()-1 == i && rangers[k].getX()-1 == j) {
-					fieldStateSchema[i*dim+j] = 'R';
-
-					conv = true;
-					break;
-				} else { continue; }
-			}
-
-			if(conv) { continue; }
-
-			for(int k = 0; k < nB; k++) {
-				if(baits[k].getY()-1 == i && baits[k].getX()-1 == j) {
-					fieldStateSchema[i*dim+j] = '.';
-
-					conv = true;
-                    break;
-				} else { continue; }
-			}
-
-			if(conv) { continue; }
-
-			if(fence.getY()-1 == i && fence.getX()-1 == j) {
-				fieldStateSchema[i*dim+j] = ':';
-
-                conv = true;
-			}
-
-			if(conv) { continue; }
-
-			if(target.getY()-1 == i && target.getX()-1 == j) {
-                fieldStateSchema[i*dim+j] = 'H';
-            } else if(field[i*dim+j].getT()) {
-                fieldStateSchema[i*dim+j] = '~';
-            } else {
-                fieldStateSchema[i*dim+j] = 't';
-            }
-		}
-
-		cout << '\n';
-	}
-};
-
-void Data::setupSpawns() {
-	int valid;
-	int x, y;
-
-    srand(time(0));
-
-    for(int i = 0; i < 4; i++) {
-        valid = false;
-
-        while(!valid) {
-            switch(i) {
-                case 0:
-                    x = 1; y = rand() % 16 + 1;
-                    break;
-                case 1:
-                    x = 16; y = rand() % 16 + 1;
-                    break;
-                case 2:
-                    x = rand() % 16 + 1; y = 1;
-                    break;
-                case 3:
-                    x = rand() % 16 + 1; y = 16;
-                    break;
-            }
-
-		    if(field[(y-1)*dim+(x-1)].getT()) {
-			    spawns[i][1] = x;
-			    spawns[i][0] = y;
-
-			    valid = true;
-		    }
-	    }
-
-    }
+        bool checkMoney(float);
 };
 
 void Data::setupField() {
 	bool placed = false;
 	int x, y;
-
-    srand(time(0));
-
+    
 	fieldGenerator.setupTiles();
 	fieldGenerator.generateField();
 
@@ -259,14 +140,6 @@ void Data::setupField() {
 		for(int j = 0; j < dim; j++) {
 			*(fieldSchema+i*dim+j) = fieldGenerator.field[i][j];
 		}
-	}
-};
-
-void Data::addEnemies() {
-	nE = 4;
-
-	for(int i = 0; i < nE; i++) {
-		enemies[i].setup(rand(), spawns[i][1], spawns[i][0], 4.0f, 1.0f, 0.1f);
 	}
 };
 
@@ -373,4 +246,12 @@ int Data::sellDefender(int xV, int yV) {
 
 	cout << "ERROR: Unable to find a defender with this coord-s!\n";
 	return -1;
+};
+
+bool Data::checkMoney(float val) {
+	if(money >= val) {
+		return true;
+	} else {
+		return false;
+	}
 };

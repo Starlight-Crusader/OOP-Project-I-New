@@ -12,23 +12,22 @@
 #include <iomanip>
 
 #include "classes.h"
-#include "simulation.h"
 
 using namespace std;
 
 
-class Visualisation: public Object {
+class Graphics: public Object {
     public:
         Visualisation(int idV) {
             id = idV;
         }
 
-        void printPhase();
-		void printStats();
-		void printFinalStats();
+        void printPhase(int);
+		void printStats(int, float, float);
+		void printFinalStats(int, float, int);
 
-        void drawState();
-        void displayPaths();
+        void drawState(char*, int);
+        void displayPaths(Enemy*);
 
         void printOptionsMain();
 		void printOptionsBuy();
@@ -36,7 +35,7 @@ class Visualisation: public Object {
 };
 
 
-int Visualisation::drawState(char *fieldStateSchema, int dim) {
+int Graphics::drawState(char *fieldStateSchema, int dim) {
 	for(int k = 0; k < 11; k++) { cout << ' '; }
     for(int k = 1; k <= 16; k++) { cout << k % 10; }
     cout << '\n';
@@ -74,7 +73,7 @@ int Visualisation::drawState(char *fieldStateSchema, int dim) {
 	return 0;
 };
 
-void Visualisation::printPhase(int phase) {
+void Graphics::printPhase(int phase) {
 	if(!phase) {
        	cout << "\n=========== PLANNIG PHASE ===========\n";
     } else {
@@ -83,7 +82,7 @@ void Visualisation::printPhase(int phase) {
     }
 };
 
-void Visualisation::printStats(int round, float hp, float money) {
+void Graphics::printStats(int round, float hp, float money) {
 	cout << '\n';
     cout << "-------------------------------------\n";
     cout << "               Stats:\n";
@@ -94,7 +93,7 @@ void Visualisation::printStats(int round, float hp, float money) {
     cout << '\n';
 };
 
-void Visualisation::printFinalStats(int round, float hp, int kills) {
+void Graphics::printFinalStats(int round, float hp, int kills) {
     cout << '\n';
     cout << "-------------------------------------\n";
     cout << "             Final stats:\n";
@@ -105,7 +104,7 @@ void Visualisation::printFinalStats(int round, float hp, int kills) {
     cout << '\n';
 };
 
-void Visualisation::displayPaths(Enemy *enemies) {
+void Graphics::displayPaths(Enemy *enemies) {
 	unsigned int second = 1000000;
 
 	for(int k = 0; k < nE; k++) {
@@ -118,7 +117,7 @@ void Visualisation::displayPaths(Enemy *enemies) {
 	}
 };
 
-void Visualisation::printOptionsMain() {
+void Graphics::printOptionsMain() {
     cout << '\n';
     cout << "-------------------------------------\n";
     cout << "          Select an action:\n";
@@ -136,7 +135,7 @@ void Visualisation::printOptionsMain() {
     cout << "OPTION: ";
 };
 
-void Visualisation::printOptionsBuy() {
+void Graphics::printOptionsBuy() {
     cout << '\n';
     cout << "-------------------------------------\n";
     cout << " Input coord-s of a new def. in the\n";
@@ -147,7 +146,7 @@ void Visualisation::printOptionsBuy() {
     cout << "INPUT: ";
 };
 
-void Visualisation::printOptionsSell() {
+void Graphics::printOptionsSell() {
     cout << '\n';
     cout << "-------------------------------------\n";
     cout << " Input coord-s of a def. to sell in\n";
