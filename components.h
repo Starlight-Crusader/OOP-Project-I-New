@@ -68,7 +68,7 @@ using namespace std;
 
 class Generator: public Object  {
     private:
-        int id  = 0;
+        int id = 0;
 
         int tile1[8][8], tile2[8][8], tile3[8][8], tile4[8][8];
 

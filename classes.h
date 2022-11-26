@@ -22,7 +22,7 @@ class Object {
 
 	public:
 		int getId() { return id; }
-            	void setId(int val) { id = val; }
+        void setId(int val) { id = val; }
 };
 
 // GENERALIZED CLASS (ABSTRACT)
@@ -33,7 +33,7 @@ class Entity: public Object {
 
 	public:
 		int getX() { return x; }
-            	int getY() { return y; }
+        int getY() { return y; }
 		void setCoords(int newX, int newY) { x = newX; y = newY; }
 };
 
@@ -74,7 +74,7 @@ class Shooter {
 	protected:
 		float range; int bullets;
 
-    	public:
+    public:
 		float getRange() { return range; }
 		void setRange(float val) { range = val; }
 		int getBullets() { return bullets; }

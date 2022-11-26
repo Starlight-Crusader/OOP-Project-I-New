@@ -1,90 +1,83 @@
 @startuml
+
+skinparam linetype polyline
+skinparam linetype ortho
+
+Object <|-- Bait
+Object <|-- Ranger
+Object <|-- Structure
+Object <|-- Trap
 Object <|-- Entity
-Object <|-- Game
-Object <|-- Generator
-Object <|-- PriceList
-Object <|-- Simulation
-Object <|-- GUI
+
+Entity <|-- Enemy
+Mortal <|-- Enemy
+Walker <|-- Enemy
+Damager <|-- Enemy
 
 Entity <|-- Trap
-Entity <|-- Bait
-Entity <|-- Ranger
-Entity <|-- Structure
-Entity <|-- Tile
-Entity <|-- Enemy
-
-Damager <|-- Enemy
-Damager <|-- Trap
-Damager <|-- Ranger
-
 Defender <|-- Trap
-Defender <|-- Bait
-Defender <|-- Ranger
-Defender <|-- Structure
+Damager <|-- Trap
 
-Mortal <|-- Enemy
-Mortal <|-- Structure
+Entity <|-- Bait
+Defender <|-- Bait
 Mortal <|-- Bait
 
-Trap --* Simulation
-Bait --* Simulation
-Ranger --* Simulation
-Structure --* Simulation
-Tile --* Simulation
-Enemy --* Simulation
-Generator --* Simulation
-
-Walker <|-- Enemy
+Entity <|-- Ranger
+Defender <|-- Ranger
+Damager <|-- Ranger
 Shooter <|-- Ranger
 
-GUI -- Game
-GUI -- Simulation
-PriceList -- Simulation
+Entity <|-- Structure
+Defender <|-- Structure
+Mortal <|-- Structure
+
+Object <|-- Tile
+
 
 abstract Object {
- # id;
+ # id
 }
 
 abstract Entity {
- # int x;
- # int y;
+ # int x
+ # int y
 }
 
 abstract Damager {
- # float dmg;
+ # float dmg
 }
 
 abstract Mortal {
- # float hp;
+ # float hp
 }
 
 abstract Walker {
- # int[][] path;
- # int lenOfPath;
+ # int[][] path
+ # int lenOfPath
 
- + void makeStep();
- + void claculatePath();
- + void displayPath();
+ + void makeStep()
+ + void claculatePath()
+ + void displayPath()
 }
 
 abstract Shooter {
- # float range;
- # int bullets;
+ # float range
+ # int bullets
 
- + bool checkBullets();
+ + bool checkBullets()
 }
 
 interface Defender {
- + int trigger();
+ + int trigger()
 }
 
 class Enemy {
- # float reward;
+ # float reward
 }
 
 class Trap {
- # int type;
- # bool armed;
+ # int type
+ # bool armed
 }
 
 class Bait {}
@@ -94,99 +87,110 @@ class Ranger {}
 class Structure {}
 
 class Tile {
- + bool occupied;
- + bool trail;
+ + bool occupied
+ + bool trail
 }
 
-class Game {
- .. STATS ..
- + int round;
- + float money;
- + int phase;
- + bool abort;
- + int kills;
- 
- 
- + bool checkMoney();
- + bool checkGO();
-}
 
-class GUI {
- + void printPhase();
- + void printStats();
- + void printFinalStats();
- 
- + void printOptionsMain();
- + void printOptionsBuy();
- + void printOptionsSell();
- 
- + int drawState();
+Data *-- Generator
+Data -- Logic
+Data -- Graphics
+Logic -- Graphics
 
- + void displayPath();
-}
+Data "1" *-- "0..*" Bait
+Data "1" *-- "0..*" Ranger
+Data "1" *-- "1" Structure
+Data "1" *-- "1..4" Enemy
+Data "1" *-- "0..*" Trap
+Data "1" *-- "256" Tile
 
-class Simulation {
- .. ACTORS ..
- + Tile[] field;
- + int dim;
- + Enemy[] enemies;
- + int nE;
- + Trap[] traps;
- + int nT;
- + Ranger[] rangers;
- + int nR;
- + Bait[] baits;
- + int nB;
- + Structure target;
- + Entity fence;
+Object <|-- Data
+Object <|-- Generator
+Object <|-- Graphics
+Object <|-- Logic
 
- + void setupField();
- 
- + void addEnemies();
- + void addTrap();
- + void addRanger();
- + void addBait();
-
- + int sellDefender();
-
- + void enemiesMove();
- + void defendersMove();
- + void checkFinish();
-
- + void calculatePaths();
-
- + void setupSpawns();
-
- + bool checkTrail();
- + bool checkOcc();
-
- .. FIELD GENERATION ..
- - Generator fieldGenerator;
- - int *schema;
-
- + int[][] spawns;
-}
-
-class PriceList {
- - float beartrap;
- - float nest;
- - float ranger;
-}
 
 class Generator {
- .. TILE POOL ..
- + int[][] tile1;
- + int[][] tile2;
- + int[][] tile3;
- + int[][] tile4;
+ - tile1[8][8]
+ - tile2[8][8]
+ - tile3[8][8]
+ - tile4[8][8]
 
- + void setuptiles();
- + void drawTiles();
+ + field[16][16]
 
- .. FIELD SCHEMA ..
- + int[][] field;
+ + void setupTiles()
+ + void drawTiles()
 
- + void generateField();
- + void drawField();
+ + void generateField()
+ + void drawField()
 }
+
+class Data {
+ .. STATS ..
+ - int round
+ - float money
+ - int phase
+ - bool abort
+ - int kills
+
+ .. PRICES ..
+ - float beartrap
+ - float nest
+ - float ranger
+
+ .. ACTORS ..
+ + int dim
+ + int nE
+ + int nT
+ + int nR
+ + int nB
+
+ .. OTHERS ..
+ + int *fieldSchema
+ + int spawns[4][2]
+
+ + void addTrap()
+ + void addRanger()
+ + void addBait()
+ + void addFence()
+
+ + int sellDefender()
+
+ + void setupField()
+
+ + bool checkTrail()
+ + bool checkOcc()
+
+ + bool checkMoney()
+}
+
+class Logic {
+ + void addEnemies()
+
+ + void enemiesMove()
+ + void defendersMove()
+ + void checkFinish()
+
+ + void setupSpawns()
+ + void constructSchema()
+ + void calculatePaths()
+
+ + bool checkGO()
+
+ + char *fieldStateSchema
+}
+
+class Graphics {
+ + void printPhase()
+ + void printStats()
+ + void printFinalStats()
+
+ + int drawState()
+ + void displayPaths()
+
+ + void printOptionsMain()
+ + void printOptionsBuy()
+ + void printOptionsSell()
+}
+
 @enduml
