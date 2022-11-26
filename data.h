@@ -3,8 +3,8 @@
 #include <unistd.h>
 #include <iomanip>
 
-#include "classes.h"
-#include "generator.h"
+#include <entities.h>
+#include <generator.h>
 
 using namespace std;
 
@@ -28,9 +28,10 @@ class Data: public Object {
         // OTHERS
 
         Generator fieldGenerator;
-        int spawns[4][2];
 
     public:
+        int spawns[4][2];
+
         // ACTORS
 
         int dim = 16;
@@ -59,6 +60,13 @@ class Data: public Object {
 
             fence.setCoords(999, 999);
         }
+
+        void addTrap(int, int, int);
+        void addRanger(int, int);
+        void addBait(int, int);
+        void addFence(int, int);
+
+        void sellDefender(int, int);
 
 		int getRound() { return round; }
 		void setRound(int rV) { round = rV; }

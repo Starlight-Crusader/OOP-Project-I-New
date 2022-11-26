@@ -53,7 +53,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <classes.h>
+#include <entities.h>
 
 using namespace std;
 

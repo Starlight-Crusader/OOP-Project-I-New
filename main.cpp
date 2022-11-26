@@ -3,11 +3,11 @@
 #include <unistd.h>
 #include <iomanip>
 
-#include "classes.h"
-#include "logic.h"
-#include "graphics.h"
-#include "data.h"
-#include "generator.h"
+#include <entities.h>
+#include <logic.h>
+#include <graphics.h>
+#include <data.h>
+#include <generator.h>
 
 using namespace std;
 
@@ -15,6 +15,7 @@ using namespace std;
 int main() {
 	int option1, option2, t; bool check;
 	unsigned int second = 1000000;
+    int tType;
 
 	srand(time(0));
     
@@ -33,143 +34,111 @@ int main() {
 			graphics.printPhase(data.getPhase()); session.printStats(data.getRound(), data.target.getHp(), data.getM());
 			logic.constructSchema(&model); graphics.drawState(&logic.fieldStateSchema, model.dim); graphics.printOptionsMain();
 
-            // <-- STOPPED HERE
-
 			scanf("%i", &option1);
 			cout << '\n';
 
 			switch(option1) {
-				case 0: session.displayPaths(); break;
+				case 0: graphics.displayPaths(&data.enemies); break;
 				case 1:
-					if(!session.checkMoney(pl.getBPrice())) {
-						cout << "ERROR: You have not enough money!\n";
-						usleep(2*second);
+                case 2:
+                    tType = option1;
 
-						break;
-					} else {
-						ol.printOptionsBuy();
+                    if(tType == 0) {
+                        if(!data.checkMoney(data.getBPrice())) {
+						    cout << "ERROR: You have not enough money!\n";
+						    usleep(2*second);
 
-						scanf("%i %i", &option1, &option2);
-
-						if(option1 == 0 && option2 == 0) { break; }
-
-						if(!session.checkTrail(option1, option2)) {
-							cout << "ERROR: You are not allowed to place traps in trees!\n";
-
-							usleep(2*second);
-							break;
-						}
-
-						if(session.checkOcc(option1, option2)) {
-							cout << "ERROR: This tile is not empty!\n";
-
-							usleep(2*second);
-							break;
-						}
-
-						check = false;
-						for(int i = 0; i < 4; i++) {
-							if(session.spawns[i][1] == option1 && session.spawns[i][0] == option2) {
-								cout << "ERROR: You are not allowed to place traps on the spawns!\n";
-								check = true;
-
-								usleep(2*second);
-							}
-
-							if(check) { break; }
-						}
-
-						if(check) {
-							break;
-						} else {
-							session.addTrap(0, option1, option2);
-	                        session.setM(session.getM()-pl.getBPrice());
-
-							break;
-						}
-					}
-				case 2:
-					if(!session.checkMoney(pl.getNPrice())) {
-                        cout << "ERROR: You have not enough money!\n";
-                        usleep(2*second);
-
-						break;
+						    break;
+					    }
                     } else {
-                        ol.printOptionsBuy();
+                        if(!data.checkMoney(data.getNPrice())) {
+						    cout << "ERROR: You have not enough money!\n";
+						    usleep(2*second);
 
-                        scanf("%i %i", &option1, &option2);
+						    break;
+					    }
 
-                        if(option1 == 0 && option2 == 0) { break; }
+                    }
 
-                        if(!session.checkTrail(option1, option2)) {
-                            cout << "ERROR: You are not allowed to place traps in trees!\n";
+                    graphics.printOptionsBuy();
+
+                    scanf("%i %i", &option1, &option2);
+
+                    if(option1 == 0 && option2 == 0) { break; }
+
+                    if(!data.checkTrail(option1, option2)) {
+                        cout << "ERROR: You are not allowed to place traps in trees!\n";
+
+                        usleep(2*second);
+                        break;
+                    }
+
+                    if(data.checkOcc(option1, option2)) {
+                        cout << "ERROR: This tile is not empty!\n";
+
+                        usleep(2*second);
+                        break;
+                    }
+
+                    check = false;
+                    for(int i = 0; i < 4; i++) {
+                        if(data.spawns[i][1] == option1 && data.spawns[i][0] == option2) {
+                            cout << "ERROR: You are not allowed to place traps on the spawns!\n";
+                            check = true;
 
                             usleep(2*second);
-                            break;
                         }
 
-                        if(session.checkOcc(option1, option2)) {
-                            cout << "ERROR: This tile is not empty!\n";
+                        if(check) { break; }
+                    }
 
-                            usleep(2*second);
-                            break;
-                        }
+                    if(check) {
+                        break;
+                    } else {
+                        data.addTrap(tType, option1, option2);
 
-                        check = false;
-                        for(int i = 0; i < 4; i++) {
-                            if(session.spawns[i][1] == option1 && session.spawns[i][0] == option2) {
-                                cout << "ERROR: You are not allowed to place traps on the spawns!\n";
-                                check = true;
-
-                                usleep(2*second);
-                            }
-
-                            if(check) { break; }
-                        }
-
-                        if(check) {
-                            break;
+                        if(tType == 0) {
+                            data.setM(data.getM()-data.getBPrice());
                         } else {
-                            session.addTrap(1, option1, option2);
-                            session.setM(session.getM()-pl.getNPrice());
-
-                            break;
+                            data.setM(data.getM()-data.getNPrice());
                         }
+
+                        break;
                     }
 				case 3:
-					if(!session.checkMoney(pl.getRPrice())) {
+					if(!data.checkMoney(data.getRPrice())) {
                         cout << "ERROR: You have not enough money!\n";
                         
                         usleep(2*second);
 						break;
                     } else {
-                        ol.printOptionsBuy();
+                        graphics.printOptionsBuy();
 
                         scanf("%i %i", &option1, &option2);
 
                         if(option1 == 0 && option2 == 0) { break; }
 
-                        if(session.checkTrail(option1, option2)) {
+                        if(data.checkTrail(option1, option2)) {
                             cout << "ERROR: You have to place rangers in the trees!\n";
 
                             usleep(2*second);
                             break;
                         }
 
-                        if(session.checkOcc(option1, option2)) {
+                        if(data.checkOcc(option1, option2)) {
                             cout << "ERROR: This tile is not empty!\n";
 
                             usleep(2*second);
                             break;
                         }
 
-                        session.addRanger(option1, option2);
-                        session.setM(session.getM()-pl.getRPrice());
+                        data.addRanger(option1, option2);
+                        data.setM(data.getM()-data.getRPrice());
 
                         break;
                     }
 				case 4:
-					ol.printOptionsBuy();
+					graphics.printOptionsBuy();
 
                     scanf("%i %i", &option1, &option2);
 
@@ -177,24 +146,24 @@ int main() {
                         break;
                     }
 
-                    if(!session.checkTrail(option1, option2)) {
+                    if(!data.checkTrail(option1, option2)) {
                         cout << "ERROR: You have to place baits on in the roads!\n";
 
                         usleep(2*second);
                         break;
                     }
 
-                    if(session.checkOcc(option1, option2)) {
+                    if(data.checkOcc(option1, option2)) {
                         cout << "ERROR: This tile is not empty!\n";
 
                         usleep(2*second);
                         break;
                     }
 
-                    session.addBait(option1, option2);
+                    data.addBait(option1, option2);
                     break;
                 case 5:
-					ol.printOptionsBuy();
+					graphics.printOptionsBuy();
 
                     scanf("%i %i", &option1, &option2);
 
@@ -202,37 +171,37 @@ int main() {
                         break;
                     }
 
-                    if(!session.checkTrail(option1, option2)) {
+                    if(!data.checkTrail(option1, option2)) {
                         cout << "ERROR: You have to place the fence on in the road!\n";
 
                         usleep(2*second);
                         break;
                     }
 
-                    if(session.checkOcc(option1, option2)) {
+                    if(data.checkOcc(option1, option2)) {
                         cout << "ERROR: This tile is not empty!\n";
 
                         usleep(2*second);
                         break;
                     }
 
-                    session.addFence(option1, option2);
-                    session.calculatePaths();
+                    data.addFence(option1, option2);
+                    logic.calculatePaths(&data);
 
 					break;
 				case 6:
-					ol.printOptionsSell();
+					graphics.printOptionsSell();
 
                     scanf("%i %i", &option1, &option2);
 
                     if(option1 == 0 && option2 == 0) { break; }
 
-					t = session.sellDefender(option1, option2);
+					t = data.sellDefender(option1, option2);
 
 					switch(t) {
-						case 0: session.setM(session.getM()+pl.getBPrice()/2); break;
-						case 1: session.setM(session.getM()+pl.getNPrice()/2); break;
-						case 2: session.setM(session.getM()+pl.getRPrice()/2); break;
+						case 0: data.setM(data.getM()+data.getBPrice()/2); break;
+						case 1: data.setM(data.getM()+data.getNPrice()/2); break;
+						case 2: data.setM(data.getM()+data.getRPrice()/2); break;
 						case 3: break;
 						case 4: break;
 						case -1: usleep(2*second); break;
@@ -240,41 +209,49 @@ int main() {
 
 					break;
 				case 7:
-					session.setPhase(1); break;
+					data.setPhase(1); break;
 				case 8:
-					system("clear"); session.printFinalStats(); return 0;
+					system("clear"); graphics.printFinalStats(data.getR()-1, data.target.getHp(), data.getK()); return 0;
 			}
 		} else {
-			while(session.getE() > 0) {
+			while(data.nE > 0) {
 				system("clear");
-				session.printPhase();
-				session.enemiesMove();
+
+				graphics.printPhase();
+				logic.enemiesMove(&data);
+
 				cout << '\n';
-				session.drawState();
-				// usleep(1*second);
+
+                logic.constructSchema(&data);
+				graphics.drawState(&logic.fieldStateSchema, model.dim);
 
 				system("clear");
-				session.printPhase();
-				session.defendersMove();
+
+				graphics.printPhase();
+				logic.defendersMove(&data);
+
 				cout << '\n';
-				session.drawState();
+
+				logic.constructSchema(&data);
+				graphics.drawState(&logic.fieldStateSchema, model.dim);
+
 				usleep(1*second);
-
-				session.checkFinish();
+                logic.checkFinish(&data);
 			}
 
-			session.setPhase(0);
-			session.setRound(session.getRound()+1);
+			data.setPhase(0);
+			data.setRound(data.getRound()+1);
 
-			if(session.checkGO()) {
-				session.setAbort(true);
+			if(logic.checkGO(&data)) {
+				data.setAbort(true);
 			} else {
-				session.setupSpawns();
+				logic.setupSpawns(&data);
 			}
 		}
 	}
 
-	system("clear"); session.printFinalStats();
+	system("clear"); 
+    graphics.printFinalStats(data.getR()-1, data.target.getHp(), data.getK());
 
 	return 0;
 };

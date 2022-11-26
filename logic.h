@@ -3,8 +3,8 @@
 #include <unistd.h>
 #include <iomanip>
 
-#include "classes.h"
-#include "data.h"
+#include <entities.h>
+#include <data.h>
 
 using namespace std;
 
@@ -25,8 +25,8 @@ class Logic: public Object {
         void constructSchema(Data*);
 		void calculatePaths(Data*);
 
-        bool checkGO() {
-			if(target.getHp() <= 0.0f) {
+        bool checkGO(Data *model) {
+			if(model->target.getHp() <= 0.0f) {
 				return true;
 			} else {
 				return false;
