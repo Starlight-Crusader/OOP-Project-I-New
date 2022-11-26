@@ -24,20 +24,19 @@ int main() {
 
 	while(!data.getAbort()) {
 		if(!data.getPhase()) {
-			system("clear");
-
-			data.addEnemies(); logic.calculatePaths(&data);
-			graphics.printPhase(data.getPhase()); session.printStats(data.getRound(), data.target.getHp(), data.getM());
-			logic.constructSchema(&model); graphics.drawState(&logic.fieldStateSchema, model.dim); graphics.printOptionsMain();
+			logic.addEnemies(&data); logic.calculatePaths(&data); logic.constructSchema(&data); system("clear");
+			graphics.printPhase(data.getPhase()); graphics.printStats(data.getRound(), data.target.getHp(), data.getM());
+            graphics.drawState(logic.fieldStateSchema, data.dim); 
+            graphics.printOptionsMain();
 
 			scanf("%i", &option1);
 			cout << '\n';
 
 			switch(option1) {
-				case 0: graphics.displayPaths(&data.enemies); break;
+				case 0: graphics.displayPaths(data.enemies, data.nE, data.dim); break;
 				case 1:
                 case 2:
-                    tType = option1;
+                    tType = option1 - 1;
 
                     if(tType == 0) {
                         if(!data.checkMoney(data.getBPrice())) {
@@ -207,29 +206,30 @@ int main() {
 				case 7:
 					data.setPhase(1); break;
 				case 8:
-					system("clear"); graphics.printFinalStats(data.getR()-1, data.target.getHp(), data.getK()); return 0;
+					system("clear"); graphics.printFinalStats(data.getRound(), data.target.getHp(), data.getK()); return 0;
 			}
 		} else {
 			while(data.nE > 0) {
+                logic.constructSchema(&data);
+
 				system("clear");
 
-				graphics.printPhase();
+				graphics.printPhase(data.getPhase());
 				logic.enemiesMove(&data);
 
 				cout << '\n';
 
-                logic.constructSchema(&data);
-				graphics.drawState(&logic.fieldStateSchema, model.dim);
+				graphics.drawState(logic.fieldStateSchema, data.dim);
 
-				system("clear");
+				logic.constructSchema(&data);
+                system("clear");
 
-				graphics.printPhase();
+				graphics.printPhase(data.getPhase());
 				logic.defendersMove(&data);
 
 				cout << '\n';
 
-				logic.constructSchema(&data);
-				graphics.drawState(&logic.fieldStateSchema, model.dim);
+				graphics.drawState(logic.fieldStateSchema, data.dim);
 
 				usleep(1*second);
                 logic.checkFinish(&data);
@@ -247,7 +247,7 @@ int main() {
 	}
 
 	system("clear"); 
-    graphics.printFinalStats(data.getR()-1, data.target.getHp(), data.getK());
+    graphics.printFinalStats(data.getRound(), data.target.getHp(), data.getK());
 
 	return 0;
 };
