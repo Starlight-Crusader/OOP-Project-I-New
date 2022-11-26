@@ -3,11 +3,11 @@
 #include <unistd.h>
 #include <iomanip>
 
-#include <entities.h>
-#include <logic.h>
-#include <graphics.h>
-#include <data.h>
-#include <generator.h>
+#include "entities.h"
+#include "logic.h"
+#include "graphics.h"
+#include "data.h"
+#include "generator.h"
 
 using namespace std;
 

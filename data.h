@@ -3,8 +3,8 @@
 #include <unistd.h>
 #include <iomanip>
 
-#include <entities.h>
-#include <generator.h>
+#include "entities.h"
+#include "generator.h"
 
 using namespace std;
 
