@@ -53,21 +53,17 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "entities.h"
-
 using namespace std;
 
 
 class Generator: public Object  {
     private:
+        int id  = 0;
+
         int tile1[8][8], tile2[8][8], tile3[8][8], tile4[8][8];
 
     public:
         int field[16][16];
-
-        Generator(int idV) {
-            id = idV;
-        }
 
 	    void setupTiles();
 		void drawTiles();
