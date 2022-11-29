@@ -215,6 +215,10 @@ void Enemy::calculatePath(int d, int tX, int tY, int fX, int fY, int *fieldSchem
 	
 	fieldCopy[y-1][x-1] = 1;
 
+    if(fY != 999 && fX != 999) {
+        fieldCopy[fY-1][fX-1] = -1;
+    }
+
 	while(1) {
 		if(fieldCopy[tY-1][tX-1] > 0) {
 			break;
