@@ -576,6 +576,8 @@ class Logic: public Object {
 		void defendersMove(Data*);
 		void checkFinish(Data*);
 
+        void destroyEnemy(Data*, int);
+
         void setupSpawns(Data*);
         void constructSchema(Data*);
 		void calculatePaths(Data*);
@@ -671,14 +673,7 @@ void Logic::defendersMove(Data *model) {
 							model->setM(model->getM()+model->enemies[j].getReward());
                             model->setK(model->getK()+1);
 
-                            for(int k = j; k < model->nE-1; k++) {
-                                model->enemies[k].setup(model->enemies[k+1].getId(),
-                                    model->enemies[k+1].getX(), model->enemies[k+1].getY(),
-                                    model->enemies[k+1].getHp(), model->enemies[k+1].getDmg(),
-                                    model->enemies[k+1].getReward());
-
-                                model->enemies[k].calculatePath(model->dim, model->target.getX(), model->target.getY(), model->fence.getX(), model->fence.getY(), model->fieldSchema);
-                            }
+                            this->destroyEnemy(model, j);
 
                             model->nE--;
 							killed = true;
@@ -712,14 +707,7 @@ void Logic::defendersMove(Data *model) {
                                 model->setM(model->getM()+model->enemies[j].getReward());
                                 model->setK(model->getK()+1);
 
-                                for(int k = j; k < model->nE-1; k++) {
-                                    model->enemies[k].setup(model->enemies[k+1].getId(),
-                                        model->enemies[k+1].getX(), model->enemies[k+1].getY(),
-                                        model->enemies[k+1].getHp(), model->enemies[k+1].getDmg(),
-                                        model->enemies[k+1].getReward());
-
-                                    model->enemies[k].calculatePath(model->dim, model->target.getX(), model->target.getY(), model->fence.getX(), model->fence.getY(), model->fieldSchema);
-                                }
+                                this->destroyEnemy(model, j);
 
                                 model->nE--;
 							    killed = true;
@@ -745,17 +733,10 @@ void Logic::defendersMove(Data *model) {
 				model->rangers[i].setBullets(model->rangers[i].getBullets()-1);
 
 				if(model->enemies[j].getHp() <= 0) {
-                     model->setM(model->getM()+model->enemies[j].getReward());
+                    model->setM(model->getM()+model->enemies[j].getReward());
                     model->setK(model->getK()+1);
 
-                    for(int k = j; k < model->nE-1; k++) {
-                        model->enemies[k].setup(model->enemies[k+1].getId(),
-                            model->enemies[k+1].getX(), model->enemies[k+1].getY(),
-                        	model->enemies[k+1].getHp(), model->enemies[k+1].getDmg(),
-                        	model->enemies[k+1].getReward());
-
-						model->enemies[k].calculatePath(model->dim, model->target.getX(), model->target.getY(), model->fence.getX(), model->fence.getY(), model->fieldSchema);
-					}
+                    this->destroyEnemy(model, j);
 
                     model->nE--;
                 }
@@ -830,12 +811,7 @@ void Logic::checkFinish(Data *model) {
 				damage += model->enemies[i].getDmg();
 
                 for(int k = i; k < model->nE-1; k++) {
-                    model->enemies[k].setup(model->enemies[k+1].getId(),
-                        model->enemies[k+1].getX(), model->enemies[k+1].getY(),
-                        model->enemies[k+1].getHp(), model->enemies[k+1].getDmg(),
-                        model->enemies[k+1].getReward());
-
-					model->enemies[k].calculatePath(model->dim, model->target.getX(), model->target.getY(), model->fence.getX(), model->fence.getY(), model->fieldSchema);
+                    this->destroyEnemy(model, k);
                 }
 
 				model->nE--;
@@ -847,6 +823,17 @@ void Logic::checkFinish(Data *model) {
 	}
 
 	model->target.setHp(model->target.getHp()-damage);
+};
+
+void Logic::destroyEnemy(Data *model, int j) {
+    for(int k = j; k < model->nE-1; k++) {
+        model->enemies[k].setup(model->enemies[k+1].getId(),
+            model->enemies[k+1].getX(), model->enemies[k+1].getY(),
+            model->enemies[k+1].getHp(), model->enemies[k+1].getDmg(),
+            model->enemies[k+1].getReward());
+
+        model->enemies[k].calculatePath(model->dim, model->target.getX(), model->target.getY(), model->fence.getX(), model->fence.getY(), model->fieldSchema);
+    }
 };
 
 // PATHS HANDLING
