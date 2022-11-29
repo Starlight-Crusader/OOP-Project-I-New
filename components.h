@@ -996,7 +996,7 @@ int Graphics::drawState(char *fieldStateSchema, int dim) {
 		for(int j = 0; j < dim; j++) {
             switch(*(fieldStateSchema+i*dim+j)) {
                 case 't':
-                    cout << "\u001b[32mt\u001b[0m"; break;
+                    cout << "\u001b[32m^\u001b[0m"; break;
                 case '~':
                     cout << "\u001b[33m~\u001b[0m"; break;
                 case 'H':
