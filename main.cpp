@@ -11,8 +11,8 @@ using namespace std;
 int main() {
     srand(time(0));
 
-    Controller controller(rand());
-    controller.main();
+    Game game(rand());
+    game.main();
 
     return 0;
 }

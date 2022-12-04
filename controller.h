@@ -5,14 +5,14 @@
 
 #include "view.h"
 #include "model.h"
-#include "classes.h"
+#include "entities.h"
 
 using namespace std;
 
 
 class Game: public Object {
     public:
-        Controller(int idV) {
+        Game(int idV) {
             id = idV;
         }
 
@@ -241,7 +241,7 @@ int Game::main() {
 
 				graphics.drawState(logic.fieldStateSchema, data.dim);
 
-				usleep(1*second);
+				usleep(0.5f*second);
                 logic.checkFinish(&data);
 			}
 
